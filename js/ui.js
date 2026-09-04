@@ -353,6 +353,9 @@ export function updateBoardUI() {
         const service = allSlots[i].service || 'openai';
         if (logoEl.dataset.provider !== service) {
           logoEl.dataset.provider = service;
+          // A silent fallback here is how a half-added provider stays invisible:
+          // it renders as some other mark and looks like it works.
+          if (!LOGOS[service]) console.warn(`no tamagotchi mark for provider "${service}"`);
           logoEl.textContent = LOGOS[service] || LOGOS.custom;
         }
 
@@ -518,61 +521,3 @@ function downloadMarkdown() {
   // Vapautetaan ennenkuin suljetaan
   document.getElementById('btnDownload').disabled = true;
 }
-
-
-// Tamagotchi Blinking Logic
-export function startTamagotchiBlink() {
-  const LOGOS = {
-    openai: '  ▄▀▀▀▄  \n █ . . █ \n █ ▀█▀ █ \n █▄▀ ▀▄█ \n  ▀▄▄▄▀  ',
-    gemini: ' ▄  █  ▄ \n  ▀▄█▄▀  \n ██ █ ██ \n  ▄▀█▀▄  \n ▀  █  ▀ ',
-    custom: ' ██▄ ▄██ \n ██. .██ \n ██ ▀ ██ \n ██ ▄ ██ \n ██   ██ ',
-    mistral: '  ▄   ▄  \n █▀█ █▀█ \n █ . . █ \n █ ▄▀▄ █ \n  ▀   ▀  '
-  };
-
-  setInterval(() => {
-    if (Math.random() > 0.3) return;
-    const laneIndex = Math.floor(Math.random() * 3);
-    const el = document.getElementById(`logo-${laneIndex}`);
-    if (!el) return;
-    
-    const provider = el.getAttribute('data-provider');
-    if (!provider || !LOGOS[provider]) return;
-    
-    const lines = LOGOS[provider].split('\n');
-    let half = lines.slice();
-    let shut = lines.slice();
-    
-    if (provider === 'openai') {
-      half[1] = ' █ - - █ ';
-      shut[1] = ' █     █ ';
-    } else if (provider === 'gemini') {
-      half[0] = ' ▀  █  ▀ ';
-      shut[0] = '    █    ';
-    } else if (provider === 'custom') {
-      half[1] = ' ██- -██ ';
-      shut[1] = ' ██   ██ ';
-    } else if (provider === 'mistral') {
-      half[2] = ' █ - - █ ';
-      shut[2] = ' █     █ ';
-    }
-    
-    el.textContent = half.join('\n');
-    setTimeout(() => {
-      if (el.getAttribute('data-provider') !== provider) return;
-      el.textContent = shut.join('\n');
-      setTimeout(() => {
-        if (el.getAttribute('data-provider') !== provider) return;
-        el.textContent = half.join('\n');
-        setTimeout(() => {
-          if (el.getAttribute('data-provider') !== provider) return;
-          el.textContent = lines.join('\n');
-        }, 50);
-      }, 50);
-    }, 50);
-    
-  }, 2000);
-}
-
-setTimeout(() => {
-  startTamagotchiBlink();
-}, 1000);

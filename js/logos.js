@@ -3,10 +3,11 @@
 // Block-character marks in the CP437 spirit. Every line is exactly 9 characters
 // wide, and letter-spacing must stay at 0 on .logo or the columns drift apart.
 //
-// The three marks map to the three services the board can run:
-//   openai -> owl        (eyes blink, occasionally spins)
-//   gemini -> starburst  (top ray blinks)
-//   custom -> cat        (ear twitch)
+// Each mark maps to one of the services a lane can run:
+//   openai  -> owl        (eyes blink, occasionally spins)
+//   gemini  -> starburst  (top ray blinks)
+//   custom  -> cat        (ear twitch)
+//   mistral -> fox        (eyes blink)
 
 export const LOGOS = {
   openai: [
@@ -29,6 +30,13 @@ export const LOGOS = {
     ' ██ ▀ ██ ',
     ' ██ ▄ ██ ',
     ' ██   ██ '
+  ].join('\n'),
+  mistral: [
+    '  ▄   ▄  ',
+    ' █▀█ █▀█ ',
+    ' █ • • █ ',
+    ' █ ▄▀▄ █ ',
+    '  ▀   ▀  '
   ].join('\n')
 };
 
@@ -46,6 +54,10 @@ const SPECS = {
   custom: {
     every: [5000, 12000],
     frames: [[0, ' ██▄ ▀██ ', 120], [0, ' ██▄  ██ ', 120], [0, ' ██▄ ▀██ ', 100]]
+  },
+  mistral: {
+    every: [4500, 10000],
+    frames: [[2, ' █ - - █ ', 70], [2, ' █     █ ', 100], [2, ' █ - - █ ', 70]]
   }
 };
 
@@ -88,10 +100,16 @@ function play(el, provider) {
   next();
 }
 
+// Comfortably longer than the 0.8s .logo.spinning animation in the host pages.
+// A timer rather than an animationend listener: the event never arrives if the
+// tab is hidden mid-spin, and a stuck class would suppress the mark's blink for
+// the rest of the session.
+const SPIN_CLEAR_MS = 1000;
+
 function spin(el) {
   if (el.classList.contains('spinning')) return;
   el.classList.add('spinning');
-  el.addEventListener('animationend', () => el.classList.remove('spinning'), { once: true });
+  setTimeout(() => el.classList.remove('spinning'), SPIN_CLEAR_MS);
 }
 
 // Recursive setTimeout rather than setInterval: the delay is re-rolled each
@@ -99,15 +117,17 @@ function spin(el) {
 function loop(action, delay, first = delay()) {
   const tick = () => {
     setTimeout(tick, delay());
-    action();
+    // Hidden tabs clamp setTimeout to about once a minute, so there is nothing
+    // worth animating while nobody is looking.
+    if (!document.hidden) action();
   };
   setTimeout(tick, first);
 }
 
 // Every mark keeps its own schedule, so three lanes on the same provider never
 // blink in lockstep. Call once the lanes carry their data-provider.
-export function startTamagotchis(selector = '.logo') {
-  document.querySelectorAll(selector).forEach(el => {
+export function startTamagotchis() {
+  document.querySelectorAll('.logo').forEach(el => {
     loop(
       () => play(el, el.dataset.provider),
       () => {
