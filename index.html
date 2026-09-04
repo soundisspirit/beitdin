@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>\n
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src https: http://localhost:* http://127.0.0.1:*; frame-ancestors 'none'; form-action 'none'">
+  <title>API Agent Board</title>
+  <style>
+    :root {
+      --bg: #000000;
+      --amber: #ffb000;
+      --amber-dim: #a06e00;
+      --ink: #d7ded3;
+      --frame: #4a4a4a;
+      --frame-hi: #6e6e6e;
+      --red: #ff5555;
+      --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+    
+    /* one font, one size, everywhere */
+    * {
+      font-family: var(--mono) !important;
+      font-size: 13px !important;
+      font-weight: 400 !important;
+      font-style: normal !important;
+      box-sizing: border-box;
+    }
+    
+    html, body { height: 100%; margin: 0; }
+    
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      
+      letter-spacing: .02em;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      text-transform: lowercase;
+    }
+    
+    ::selection { background: var(--amber); color: #000; }
+
+    /* Titlebar */
+    header.titlebar {
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--amber);
+      color: #000;
+      padding: 6px 14px;
+      letter-spacing: .02em;
+    }
+    
+    header.titlebar h1 {
+      margin: 0;
+      letter-spacing: .02em;
+    }
+
+    .controls {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    button {
+      background: none;
+      border: 0;
+      padding: 1px 3px;
+      
+      color: var(--ink);
+      cursor: pointer;
+      text-transform: lowercase;
+    }
+    button::before { content: "["; }
+    button::after { content: "]"; }
+    button:hover:not(:disabled) { background: #000; color: var(--amber); }
+    button:disabled { opacity: .45; cursor: default; }
+
+    .titlebar button { color: #000; }
+    .titlebar button:hover:not(:disabled) { background: #000; color: var(--amber); }
+
+    /* Promptbox */
+    .promptbox {
+      flex: none;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 16px;
+      padding: 9px 14px 10px;
+      border-bottom: 1px solid var(--frame);
+      height: 44px;
+      box-sizing: border-box;
+    }
+    .prompt-input-area {
+      display: flex;
+      gap: 8px;
+      align-items: center; /* Center aligns the text and input vertically */
+    }
+    .caret { color: var(--amber); flex: none;  }
+    .promptbox input {
+      flex: 1;
+      min-width: 0;
+      background: transparent;
+      border: 0;
+      color: var(--ink);
+      
+      letter-spacing: inherit;
+      padding: 0;
+      margin: 0;
+      caret-color: var(--amber);
+      text-transform: none; 
+      outline: none;
+    }
+    .promptbox input::placeholder { color: var(--ink); opacity: .55; text-transform: lowercase; }
+    
+    .brief-footer {
+      display: flex;
+      justify-content: flex-start;
+      
+      color: var(--frame-hi);
+    }
+
+    /* Lanes */
+    .lanes-wrap {
+      flex: 1 1 auto;
+      min-height: 0;
+      position: relative;
+    }
+    .lanes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      height: 100%;
+    }
+    .lane {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      min-width: 0;
+    }
+    .lane + .lane { border-left: 1px solid var(--frame); }
+    
+    .lane-head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 10px 11px;
+      flex: none;
+      border-bottom: 1px solid var(--frame);
+      perspective: 400px;
+      min-height: 90px;
+    }
+
+    /* ASCII Tamagotchi Logos.
+       Block marks are 9 characters wide on every line: line-height must be 1
+       and letter-spacing 0, or the columns drift apart. */
+    .logo {
+      margin: 0 0 10px 0;
+      color: var(--amber);
+      line-height: 1;
+      letter-spacing: 0;
+      white-space: pre;
+      user-select: none;
+      font-variant-ligatures: none;
+    }
+    @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    @keyframes spin { from { transform: rotateY(0); } to { transform: rotateY(360deg); } }
+    
+    .logo[data-provider="gemini"] { animation: bob 4s ease-in-out infinite; }
+    .logo[data-provider="openai"] { animation: bob 4.5s ease-in-out infinite; }
+    .logo[data-provider="custom"] { animation: bob 5s ease-in-out infinite; }
+    .logo.spinning { animation: spin 0.8s ease-in-out; }
+    
+    .role-title {
+      color: var(--amber);
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .lane-status {
+      color: var(--frame-hi);
+    }
+
+    .term {
+      flex: 1;
+      overflow-y: auto;
+      padding: 11px 13px 18px;
+      line-height: 1.6;
+      color: var(--ink);
+      white-space: pre-wrap;
+      word-break: break-word;
+      scrollbar-width: thin;
+      text-transform: none;
+    }
+    .term::-webkit-scrollbar { width: 8px; }
+    .term::-webkit-scrollbar-thumb { background: var(--frame); }
+
+    .streaming-cursor::after {
+      content: "█";
+      color: var(--amber);
+      animation: blink 0.9s steps(2, start) infinite;
+      margin-left: 4px;
+    }
+    @keyframes blink { 50% { opacity: 0.15; } }
+
+    /* Footer */
+    .result-foot {
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px 11px;
+      border-top: 1px solid var(--frame);
+      background: var(--bg);
+    }
+    .verdict { color: var(--ink); letter-spacing: .02em; }
+    .verdict::before { content: "["; }
+    .verdict::after { content: "]"; }
+    
+    .right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+    /* Full Page Overlays (for Roles / About) */
+    .page-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.92);
+      z-index: 50;
+      overflow-y: auto;
+      padding: 28px 32px 40px;
+      scrollbar-width: thin;
+    }
+    .page-bg::-webkit-scrollbar { width: 8px; }
+    .page-bg::-webkit-scrollbar-thumb { background: var(--frame); }
+    .page-bg.open { display: block; }
+    
+    .page-close {
+      position: absolute;
+      top: 10px;
+      right: 16px;
+      background: none;
+      border: 0;
+      color: var(--ink);
+      
+      cursor: pointer;
+      padding: 2px 6px;
+    }
+    .page-close:hover { color: var(--amber); background: none; }
+    
+    .page p { color: var(--ink); margin: 0 0 10px; line-height: 1.7; text-transform: none; }
+    
+    .page .sep { border-top: 1px solid var(--frame); margin: 16px 0; }
+    
+    .board-pick { cursor: pointer; color: var(--ink); margin-bottom: 6px; }
+    .board-pick::before { content: "  "; white-space: pre; }
+    .board-pick:hover::before { content: "> "; color: var(--amber); }
+    .board-pick.active::before { content: "> "; color: var(--amber); }
+    .board-pick.active { color: var(--amber); }
+    
+    
+
+    /* Modals (Native Dialog for Settings) */
+    dialog {
+      margin: auto;
+      background: #111;
+      border: 1px solid var(--amber-dim);
+      padding: 16px 20px;
+      width: 440px;
+      max-width: 90vw;
+      max-height: 80vh;
+      overflow-y: auto;
+      
+      color: var(--ink);
+      text-transform: lowercase;
+    }
+    dialog::backdrop { background: rgba(0,0,0,0.75); }
+    .page-bg input, .lane-settings input, .page-bg select, .lane-settings select {
+      display: block; width: 100%;
+      background: transparent;
+      border: 0;
+      border-bottom: 1px solid var(--frame);
+      color: var(--amber);
+      padding: 4px 0;
+      caret-color: var(--amber);
+      text-transform: lowercase;
+    }
+    .page-bg input, .lane-settings input:focus, .page-bg select, .lane-settings select:focus {
+      outline: none;
+      border-bottom-color: var(--amber);
+    }
+    .page-bg input, .lane-settings input[type="password"] { text-transform: none; }
+    .modal-btns { display: flex; gap: 8px; justify-content: flex-start; margin-top: 14px; }
+
+    @media (max-width: 900px) {
+      body { overflow: auto; }
+      .lanes-wrap { min-height: auto; }
+      .lanes { grid-template-columns: 1fr; height: auto; }
+      .lane { height: 38vh; }
+      .lane + .lane { border-left: 0; border-top: 1px solid var(--frame); }
+    }
+  
+    
+  
+    .term-select {
+      position: relative;
+      width: 100%;
+      cursor: pointer;
+      color: var(--amber);
+      border-bottom: 1px solid var(--frame);
+      padding: 4px 0;
+      user-select: none;
+      margin-bottom: 16px;
+    }
+    .term-select-current {
+      display: flex;
+      justify-content: space-between;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .term-select-current::after {
+      content: '[+]';
+      color: var(--frame);
+    }
+    .term-select.open .term-select-current::after {
+      content: '[-]';
+      color: var(--amber);
+    }
+    .term-options {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      background: var(--bg);
+      border: 1px dashed var(--frame);
+      margin-top: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .term-select.open .term-options {
+      display: flex;
+    }
+    .term-option {
+      padding: 4px 8px;
+      color: var(--amber-dim);
+      white-space: nowrap;
+    }
+    .term-option.selected {
+      color: var(--amber);
+    }
+    .term-option:hover, .term-option.selected:hover {
+      background: var(--amber);
+      color: var(--bg);
+    }
+    .term-option.selected::before {
+      content: '> ';
+    }
+
+  
+    @keyframes term-blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    .blinking {
+      animation: term-blink 1s infinite;
+    }
+
+    #mobile-warning {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: var(--bg);
+      color: var(--amber);
+      z-index: 9999;
+      padding: 32px;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+    
+    @media (max-width: 999px) {
+      body > *:not(#mobile-warning) {
+        display: none !important;
+      }
+      #mobile-warning {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="mobile-warning">
+    <div style="text-align: left; max-width: 600px; width: 100%;">
+      <p style="color: var(--red);">> FATAL ERROR: DISPLAY_WIDTH_TOO_SMALL</p>
+      <p style="color: var(--amber-dim); margin-top: 16px;">api_agent_board requires a minimum viewport width of 1000px to render the concurrent 3-lane execution environment.</p>
+      <p style="color: var(--amber); margin-top: 16px;">[ system halted ]</p>
+      <p style="color: var(--frame); margin-top: 8px;">please use a desktop browser or expand your window.</p>
+    </div>
+  </div>
+
+
+  <header class="titlebar">
+    <h1 id="homeLogo" style="cursor: pointer;">api_agent_board</h1>
+    
+    <div class="controls">
+      <button id="btnAbout">about</button>
+      <button id="btnSettings">settings</button>
+      <button id="btnPingAll">ping_all_slots</button>
+      <button id="btnRoles">roles</button>
+      <button id="btnShuffleRoles">shuffle_roles</button>
+      <button id="btnCancel" style="display:none; color: var(--red);">cancel</button>
+      <button id="btnRun">run</button>
+    </div>
+  </header>
+
+
+  
+  <div class="promptbox">
+    <div class="prompt-input-area" id="promptArea">
+      <span class="caret">></span>
+      <input id="briefInput" placeholder="paste your topic to the board..." autocomplete="off">
+    </div>
+      
+
+    <div id="rolesTopBar" style="display: none; align-items: center; gap: 24px; ">
+      <div style="display: flex; align-items: center; gap: 8px; width: 250px;">
+        <label style="color:var(--amber-dim);">> board:</label>
+        <div class="term-select" id="board-select-wrapper" style="text-align: left; flex: 1; margin-bottom: 0;">
+          <div class="term-select-current" id="board-select-current"></div>
+          <div class="term-options" id="board-options"></div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <button id="btnNewBoard" style="background: transparent; border: none; color: var(--amber); cursor: pointer; font: inherit;">new</button>
+        <button id="btnDownloadBoard" style="background: transparent; border: none; color: var(--amber); cursor: pointer; font: inherit;">export</button>
+        <button id="btnUploadBoard" style="background: transparent; border: none; color: var(--amber); cursor: pointer; font: inherit;">import</button>
+        <button id="btnDeleteBoard" style="background: transparent; border: none; color: var(--red); cursor: pointer; font: inherit; display: none;">delete</button>
+        <input type="file" id="uploadBoardInput" accept=".json" style="display: none;">
+      </div>
+    </div>
+    <div class="brief-footer" id="promptFooter" style="margin-top: 0; flex-shrink: 0;">
+      <span id="charCount">0 / 12000 char</span>
+    </div>
+  </div>
+
+  <main class="lanes-wrap">
+    <div class="lanes">
+      <!-- Slot 1 -->
+      <div class="lane" id="lane-0">
+        <div class="lane-head">
+          <div class="logo" id="logo-0"></div>
+          <div class="role-title" id="role-0">role_1</div>
+          <div class="lane-status" id="status-0">waiting</div>
+        </div>
+        <div class="term" id="content-0"></div>
+        <div class="lane-settings" id="settings-0" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"></div>
+        <div class="lane-roles" id="roles-0" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"><div style="margin-bottom: 16px;"><label style="display:block; color:var(--amber-dim); margin-bottom:4px;">> lane_1_title:</label><input type="text" id="role-title-0" style="width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 4px 0; outline: none;"></div><div style="margin-bottom: 16px;"><label style="display:block; color:var(--amber-dim); margin-bottom:4px;">> system_prompt:</label><textarea id="role-focus-0" style="width: 100%; background: transparent; border: 1px dashed var(--frame); color: var(--amber); font: inherit; padding: 8px; outline: none; min-height: 200px; resize: vertical;"></textarea></div></div>
+        <div class="lane-about" id="about-0" style="display: none; padding: 16px; overflow-y: auto; flex: 1; color: var(--ink);">
+          <p style="color: var(--amber);">> what_is_this</p>
+          <p>api_agent_board is a brutalist interface for concurrent AI orchestration.<br><br>it executes prompts against multiple models (openai, gemini, local ollama/vllm) simultaneously.</p>
+        </div>
+      </div>
+      
+      <!-- Slot 2 -->
+      <div class="lane" id="lane-1">
+        <div class="lane-head">
+          <div class="logo" id="logo-1"></div>
+          <div class="role-title" id="role-1">role_2</div>
+          <div class="lane-status" id="status-1">waiting</div>
+        </div>
+        <div class="term" id="content-1"></div>
+        <div class="lane-settings" id="settings-1" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"></div>
+        <div class="lane-roles" id="roles-1" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"><div style="margin-bottom: 16px;"><label style="display:block; color:var(--amber-dim); margin-bottom:4px;">> lane_2_title:</label><input type="text" id="role-title-1" style="width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 4px 0; outline: none;"></div><div style="margin-bottom: 16px;"><label style="display:block; color:var(--amber-dim); margin-bottom:4px;">> system_prompt:</label><textarea id="role-focus-1" style="width: 100%; background: transparent; border: 1px dashed var(--frame); color: var(--amber); font: inherit; padding: 8px; outline: none; min-height: 200px; resize: vertical;"></textarea></div></div>
+        <div class="lane-about" id="about-1" style="display: none; padding: 16px; overflow-y: auto; flex: 1; color: var(--ink);">
+          <p style="color: var(--amber);">> why_it_exists</p>
+          <p>built for testing, comparing, and pipelining output from multiple perspectives, getting multi-angle responses from different models and role combinations. currently this support running 3 apis at once, but try also shuffle roles when you have run once and get more perspectives.<br><br>every time you click [ run ], the output is appended to the markdown document. you can shuffle roles and run again to accumulate multiple perspectives into a single downloadable .md file.</p>
+        </div>
+      </div>
+      
+      <!-- Slot 3 -->
+      <div class="lane" id="lane-2">
+        <div class="lane-head">
+          <div class="logo" id="logo-2"></div>
+          <div class="role-title" id="role-2">role_3</div>
+          <div class="lane-status" id="status-2">waiting</div>
+        </div>
+        <div class="term" id="content-2"></div>
+        <div class="lane-settings" id="settings-2" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"></div>
+        <div class="lane-roles" id="roles-2" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"><div style="margin-bottom: 16px;"><label style="display:block; color:var(--amber-dim); margin-bottom:4px;">> lane_3_title:</label><input type="text" id="role-title-2" style="width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 4px 0; outline: none;"></div><div style="margin-bottom: 16px;"><label style="display:block; color:var(--amber-dim); margin-bottom:4px;">> system_prompt:</label><textarea id="role-focus-2" style="width: 100%; background: transparent; border: 1px dashed var(--frame); color: var(--amber); font: inherit; padding: 8px; outline: none; min-height: 200px; resize: vertical;"></textarea></div></div>
+        <div class="lane-about" id="about-2" style="display: none; padding: 16px; overflow-y: auto; flex: 1; color: var(--ink);">
+          <p style="color: var(--amber);">> tech_specs</p>
+          <p>- no build step, pure vanilla js<br>- sse streaming with native fetch<br>- local storage persistence<br>- parallel promise fan-out execution</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Roles Full Page Overlay -->
+    
+  </main>
+
+  <footer class="result-foot">
+    <span class="verdict" id="globalStatus">idle</span>
+    <div class="right" style="display: flex; gap: 16px;">
+      <button id="btnClearRuns" disabled style="display: none; color: var(--red);">clear_runs</button>
+      <button id="btnDownload" disabled>download .md</button>
+    </div>
+  </footer>
+
+  
+
+  <!-- About Dialog -->
+  
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
