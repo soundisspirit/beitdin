@@ -114,7 +114,7 @@ export async function runBoard(boardId, brief, onLaneUpdate, onStatusChange) {
   
   const slots = getActiveSlots();
   if (slots.length === 0) {
-    throw new Error("no active slots. configure settings first.");
+    throw new Error("no active lanes. configure settings first.");
   }
 
   const board = getBoards()[boardId];

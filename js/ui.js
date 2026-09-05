@@ -233,7 +233,7 @@ export function initUI() {
     }
     
     setTimeout(() => {
-      btn.textContent = 'ping_all_slots';
+      btn.textContent = 'ping_all_lanes';
       btn.style.color = '';
       btn.disabled = false;
     }, 3000);
@@ -568,7 +568,7 @@ async function startRun() {
   const activeSlots = getActiveSlots();
   if (activeSlots.length === 0) {
     const gs = document.getElementById('globalStatus');
-    gs.textContent = "error: no active slots. check settings.";
+    gs.textContent = "error: no active lanes. check settings.";
     gs.style.color = 'var(--red)';
     setTimeout(() => { gs.textContent = 'Status: READY'; gs.style.color = ''; }, 3000);
     return;
