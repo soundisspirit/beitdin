@@ -1,17 +1,22 @@
 /**
  * Cookie consent gate.
  *
- * Nothing analytics-related may load before this returns 'granted'. The banner
- * is not decoration: onGrant is the only path that runs the loader, so a
- * decline means the script is never fetched and no cookie is ever set.
+ * Nothing analytics-related may load except through onGrant, which runs only
+ * when consent is granted. A decline therefore means the script is never
+ * fetched and no cookie is ever set.
  *
- * The choice is kept under the app's apb_ prefix, so "wipe all data" clears it
+ * The answer is kept under the app's apb_ prefix, so "wipe all data" clears it
  * too and the banner comes back, which is the right behaviour for a reset.
  */
 
 const KEY = 'apb_consent';
 const GRANTED = 'granted';
 const DENIED = 'denied';
+
+let bar = null;
+let onGrantFn = () => {};
+let grantRan = false;
+let wired = false;
 
 export function getConsent() {
   try {
@@ -27,45 +32,57 @@ function remember(value) {
   try {
     localStorage.setItem(KEY, value);
   } catch (e) {
-    // If we cannot remember the answer we still honour it for this page view.
+    // If the answer cannot be stored we still honour it for this page view.
     console.warn('could not persist the consent choice', e);
   }
 }
 
+function choose(value) {
+  remember(value);
+  if (bar) bar.hidden = true;
+
+  if (value === GRANTED) {
+    if (!grantRan) {
+      grantRan = true;
+      onGrantFn();
+    }
+    return;
+  }
+
+  // Withdrawing after accepting: the tag is already in this document and
+  // stopping it properly means starting over without it.
+  if (grantRan) location.reload();
+}
+
 /**
- * @param {() => void} onGrant runs once, and only if consent is granted:
- *        now if it was granted earlier, or on the accept click.
+ * @param {() => void} onGrant runs once, and only with consent: now if it was
+ *        granted before, or when accept is pressed.
  */
 export function initConsent(onGrant = () => {}) {
-  const bar = document.getElementById('consentBar');
-  const decided = getConsent();
+  onGrantFn = onGrant;
+  bar = document.getElementById('consentBar');
+  if (!bar) return;
 
+  if (!wired) {
+    document.getElementById('consentAccept')?.addEventListener('click', () => choose(GRANTED));
+    document.getElementById('consentDecline')?.addEventListener('click', () => choose(DENIED));
+    // Withdrawing has to be as easy as consenting, so the control is permanent
+    // rather than only shown while the banner is up.
+    document.getElementById('btnCookieSettings')?.addEventListener('click', openConsentSettings);
+    wired = true;
+  }
+
+  const decided = getConsent();
   if (decided === GRANTED) {
+    bar.hidden = true;
+    grantRan = true;
     onGrant();
     return;
   }
-  if (decided === DENIED) return;
-
-  if (!bar) return;
-  bar.hidden = false;
-
-  document.getElementById('consentAccept')?.addEventListener('click', () => {
-    remember(GRANTED);
-    bar.hidden = true;
-    onGrant();
-  });
-
-  document.getElementById('consentDecline')?.addEventListener('click', () => {
-    remember(DENIED);
-    bar.hidden = true;
-  });
+  bar.hidden = decided === DENIED;
 }
 
-/** Clears the stored answer so the banner asks again on the next load. */
-export function resetConsent() {
-  try {
-    localStorage.removeItem(KEY);
-  } catch (e) {
-    console.warn('could not clear the consent choice', e);
-  }
+/** Reopens the banner so the current answer can be changed. */
+export function openConsentSettings() {
+  if (bar) bar.hidden = false;
 }
