@@ -107,9 +107,9 @@ export function renderSettings() {
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
         <label style="color:var(--amber-dim);">> provider:</label>
         <div class="term-select" id="service-select-${i}" style="margin-bottom: 0; flex: 1;">
-          <div class="term-select-current">${!slot.enabled ? '[ disable_lane ]' : slot.service === 'gemini' ? 'google_gemini' : slot.service === 'custom' ? 'custom / local' : slot.service === 'mistral' ? 'mistral' : 'openai'}</div>
+          <div class="term-select-current">${!slot.enabled ? '[disable_lane]' : slot.service === 'gemini' ? 'google_gemini' : slot.service === 'custom' ? 'custom / local' : slot.service === 'mistral' ? 'mistral' : 'openai'}</div>
           <div class="term-options">
-            <div class="term-option ${!slot.enabled ? 'selected' : ''}" data-val="disabled">[ disable_lane ]</div>
+            <div class="term-option ${!slot.enabled ? 'selected' : ''}" data-val="disabled">[disable_lane]</div>
             <div class="term-option ${slot.enabled && slot.service === 'openai' ? 'selected' : ''}" data-val="openai">openai</div>
             <div class="term-option ${slot.enabled && slot.service === 'gemini' ? 'selected' : ''}" data-val="gemini">google_gemini</div>
             <div class="term-option ${slot.enabled && slot.service === 'mistral' ? 'selected' : ''}" data-val="mistral">mistral</div>
@@ -144,7 +144,7 @@ export function renderSettings() {
         </div>
       </div>` : `
       <div style="margin-bottom: 16px; color: var(--frame);">
-        > model: [ requires ping ]
+        > model: [requires ping]
       </div>
       `}
     `;
