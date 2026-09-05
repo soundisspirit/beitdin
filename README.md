@@ -1,5 +1,16 @@
 # api_agent_board
 
+```
+ ▄  ▄  ▄
+ █  █  █
+ █  █  █
+ █  █  █
+ ▀  ▀  ▀
+```
+
+Three lanes. That mark is the source of every icon in this repo; see
+`docs/DESIGN-SYSTEM.md` and regenerate with `python3 tools/make-icons.py`.
+
 A concurrent multi-agent execution environment built for testing, comparing, and pipelining output from multiple LLM perspectives.
 
 The application runs entirely client-side, fetching directly from provider APIs (OpenAI, Google Gemini, Custom/Local, Mistral). There is no backend database and no build step.
@@ -47,6 +58,7 @@ The application strictly adheres to a brutally minimal, terminal-inspired design
 │   ├── orchestrator.js  # Concurrent LLM execution, board definitions
 │   ├── slots.js         # Provider configuration handling
 │   └── adapters/        # LLM specific API handlers (OpenAI, Gemini)
+├── tools/make-icons.py  # Regenerates every icon from the ASCII mark
 ├── icon.png             # Master icon (512x512)
 └── docs/                # Architecture records and decision logs
 ```

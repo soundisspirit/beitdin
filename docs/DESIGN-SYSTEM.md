@@ -1,38 +1,64 @@
 # API Agent Board - Design System
 
-Tämä dokumentti määrittelee sovelluksen ulkoasun (UI/UX) säännöt. Design nojaa vahvasti brutalistiseen, retrohenkiseen terminaali/hakkeri-estetiikkaan. Tavoitteena on työkalu, joka näyttää siltä kuin se pyörisi komentorivillä, mutta hyödyntää selaimen layout-ominaisuuksia.
+This document defines the UI/UX rules for the application. The design leans hard into a brutalist, retro terminal/hacker aesthetic. The goal is a tool that looks as if it were running on a command line, while still using the browser's layout capabilities.
 
-## 1. Väripaletti (CSS Variables)
+## 1. Colour palette (CSS variables)
 
-Käytämme rajattua, tarkasti harkittua väripalettia:
+We use a deliberately narrow palette:
 
-| CSS Muuttuja | Värikoodi | Kuvaus / Käyttökohde |
+| CSS variable | Colour | Description / where it is used |
 | :--- | :--- | :--- |
-| `--bg` | `#000000` | Päätaustaväri. Aito musta. |
-| `--amber` | `#ffb000` | Ensisijainen korostusväri (Primary / Accent). Linkit, aktiiviset tilat, kursorit, logot. |
-| `--amber-dim` | `#a06e00` | Himmennetty korostusväri. Otsikot modaleissa, avain-arvo -parien avaimet. |
-| `--ink` | `#d7ded3` | Päätekstin väri (Light gray). Perusteksti, leipäteksti. |
-| `--frame` | `#4a4a4a` | Reunukset (Borders), jakajat ja inaktiiviset elementit. |
-| `--frame-hi` | `#6e6e6e` | Korostetummat reunukset tai inaktiiviset tilanilmaisimet. |
-| `--red` | `#ff5555` | Virhetilat, epäonnistumiset (Error). |
+| `--bg` | `#000000` | Main background. True black. |
+| `--amber` | `#ffb000` | Primary accent. Links, active states, cursors, marks. |
+| `--amber-dim` | `#a06e00` | Dimmed accent. Headings in modals, the key half of key/value pairs. |
+| `--ink` | `#d7ded3` | Main text colour (light grey). Body copy. |
+| `--frame` | `#4a4a4a` | Borders, dividers and inactive elements. |
+| `--frame-hi` | `#6e6e6e` | Stronger borders, and inactive status indicators. |
+| `--red` | `#ff5555` | Error states and failures. |
 
-## 2. Typografia
+## 2. Typography
 
-**Fonttiperhe:**
+**Font family:**
 ```css
 --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 ```
-Kaikki teksti koko sovelluksessa on tasalevyistä (monospace).
+All text in the application is monospace.
 
-**Perussäännöt:**
-- **Text-transform:** Koko sovelluksen perusilme on `lowercase` (pienet kirjaimet), mukaan lukien napit, otsikot ja pudotusvalikot. (Poikkeuksena käyttäjän syöttämä teksti ja LLM:n palauttama markdown).
-- **Peruskoko:** `13px` / riviväli `1.55`.
-- **Kirjainväli (Letter-spacing):** `.02em` perustekstissä, tuomaan pientä terminaali-tuntumaa.
+**Base rules:**
+- **Text transform:** The whole application is `lowercase` by default, including buttons, headings and dropdowns. (The exceptions are text the user types and markdown returned by the LLM.)
+- **Base size:** `13px` with a line height of `1.55`.
+- **Letter spacing:** `.02em` on body text, for a slight terminal feel.
 
-## 3. Komponentit
+## 3. Brand mark
 
-### Painikkeet (Buttons)
-Napit näyttävät komentorivikomennoilta. Ne ympäröidään hakasulkeilla pseudo-elementtien (`::before`, `::after`) avulla.
+The application mark is three lanes:
+
+```
+ ▄  ▄  ▄
+ █  █  █
+ █  █  █
+ █  █  █
+ ▀  ▀  ▀
+```
+
+Read on a 9x5 character grid: the bars occupy columns 1, 4 and 7, and each runs
+from halfway down the first row (`▄`) to halfway down the last (`▀`), making it
+four rows tall. A monospace cell is 0.6 as wide as it is tall, so the inked area
+is 7 bar-widths across and 20/3 bar-widths tall, very nearly square.
+
+Every icon in the repo is derived from that geometry rather than drawn by hand,
+so the two cannot drift apart. `tools/make-icons.py` regenerates `favicon.ico`
+(16/32/48/64), `icon.png`, `icon-512.png`, `icon-192.png` and
+`apple-touch-icon.png` as `--amber` bars on a `--bg` field. Change the geometry
+in one place and re-run it.
+
+The mark is distinct from the three per-lane marks in `js/logos.js`: this one
+identifies the application, those identify a lane.
+
+## 4. Components
+
+### Buttons
+Buttons read as command line commands. They are wrapped in square brackets using pseudo elements (`::before`, `::after`).
 ```css
 .btn {
   background: none;
@@ -46,8 +72,8 @@ Napit näyttävät komentorivikomennoilta. Ne ympäröidään hakasulkeilla pseu
 .btn:hover { background: #000; color: var(--amber); }
 ```
 
-### Typewriter-kursori
-Aktiivinen syöttö tai streamaus esitetään vilkkuvalla kursorilla.
+### Typewriter cursor
+Active input or streaming is shown with a blinking cursor.
 ```css
 .cursor {
   display: inline-block;
@@ -59,22 +85,22 @@ Aktiivinen syöttö tai streamaus esitetään vilkkuvalla kursorilla.
 @keyframes blink { 50% { opacity: 0.15; } }
 ```
 
-### Modaalit ja Dialogit
-- **Tausta:** Musta tausta `rgba(0,0,0,0.75)`.
-- **Ikkuna:** Taustaväri `#111` (hieman mustaa vaaleampi), reunus `--amber-dim`.
-- **Kentät (Input/Textarea):** Tausta läpinäkyvä `transparent`, reunus `--frame`, tekstiväri `--ink`. Fokusointi muuttaa reunuksen `--amber`-väriin. `caret-color: var(--amber);`.
+### Modals and dialogs
+- **Backdrop:** Black at `rgba(0,0,0,0.75)`.
+- **Window:** Background `#111` (slightly lighter than black), border `--amber-dim`.
+- **Fields (input/textarea):** Transparent background, `--frame` border, `--ink` text. Focus turns the border `--amber`. `caret-color: var(--amber);`.
 
-## 4. Layout ja Rakenne
+## 5. Layout and structure
 
-Sovellus on jaettu selkeisiin joustaviin lohkoihin (`display: flex` ja `grid`):
-1. **Titlebar:** Yläpalkki. Taustaväri `--amber`, teksti `#000` (musta). Tämä poikkeaa muusta teemasta toimiakseen visuaalisena ankkurina.
-2. **Promptbox:** Yläosan tekstikenttä tehtävänannolle. Laajenee fokusoitaessa.
-3. **Lanes (Kaistat):** Pääalue on jaettu CSS Gridillä kolmeen yhtä suureen sarakkeeseen (`grid-template-columns: repeat(3, minmax(0, 1fr))`). Sarakkeiden välillä on `--frame` värinen 1px raja.
-4. **Lane Header:** Jokaisella kaistalla on keskitetty ASCII-logo.
-5. **Result / Footer:** Alareunassa yhteenveto ja tilapalkki.
+The application is split into clear flexible blocks (`display: flex` and `grid`):
+1. **Titlebar:** Top bar. Background `--amber`, text `#000`. This departs from the rest of the theme deliberately, to act as a visual anchor.
+2. **Promptbox:** The brief field at the top. Expands on focus.
+3. **Lanes:** The main area is split by CSS Grid into three equal columns (`grid-template-columns: repeat(3, minmax(0, 1fr))`), separated by a 1px `--frame` border.
+4. **Lane header:** Each lane carries a centred ASCII mark.
+5. **Result / footer:** Summary and status bar along the bottom.
 
-## 5. Animoinnit
-Animaatioita käytetään vain siellä missä ne kertovat tilasta. Logot ovat
-staattisia: ne ovat tunnus, eivät efekti.
-- **Blink:** Striimauskursori vilkkuu karkeasti (`steps(2)`).
-- **Term-blink:** Tilarivi vilkkuu ajon ollessa käynnissä.
+## 6. Animation
+Animation is used only where it reports state. The marks are static: they are an
+identifier, not an effect.
+- **Blink:** The streaming cursor blinks coarsely (`steps(2)`).
+- **Term-blink:** The status line blinks while a run is in progress.
