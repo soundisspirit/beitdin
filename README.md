@@ -76,4 +76,6 @@ Model output is written with `textContent`, never `innerHTML`.
 - Native ES modules. No build step, no bundler, no npm dependencies.
 - Terminal brutalism: monospace throughout, one font size, square corners,
   buttons drawn as `[name]`.
+- No native modals and no `<dialog>` elements. Anything that needs input asks
+  for it inline, in the bar it belongs to.
 - Model output goes through `textContent`.

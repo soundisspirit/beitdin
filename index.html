@@ -259,21 +259,6 @@
     
     
 
-    /* Modals (Native Dialog for Settings) */
-    dialog {
-      margin: auto;
-      background: #111;
-      border: 1px solid var(--amber-dim);
-      padding: 16px 20px;
-      width: 440px;
-      max-width: 90vw;
-      max-height: 80vh;
-      overflow-y: auto;
-      
-      color: var(--ink);
-      text-transform: lowercase;
-    }
-    dialog::backdrop { background: rgba(0,0,0,0.75); }
     .page-bg input, .lane-settings input, .page-bg select, .lane-settings select {
       display: block; width: 100%;
       background: transparent;
@@ -289,7 +274,6 @@
       border-bottom-color: var(--amber);
     }
     .page-bg input, .lane-settings input[type="password"] { text-transform: none; }
-    .modal-btns { display: flex; gap: 8px; justify-content: flex-start; margin-top: 14px; }
 
   
     
@@ -429,12 +413,22 @@
           <div class="term-options" id="board-options"></div>
         </div>
       </div>
-      <div style="display: flex; gap: 16px; align-items: center;">
+      <div id="boardControls" style="display: flex; gap: 16px; align-items: center;">
         <button id="btnNewBoard" style="background: transparent; border: none; color: var(--amber); cursor: pointer; font: inherit;">new</button>
         <button id="btnDownloadBoard" style="background: transparent; border: none; color: var(--amber); cursor: pointer; font: inherit;">export</button>
         <button id="btnUploadBoard" style="background: transparent; border: none; color: var(--amber); cursor: pointer; font: inherit;">import</button>
         <button id="btnDeleteBoard" style="background: transparent; border: none; color: var(--red); cursor: pointer; font: inherit; display: none;">delete</button>
         <input type="file" id="uploadBoardInput" accept=".json" style="display: none;">
+      </div>
+
+      <!-- Naming a new board happens inline, in the terminal style. -->
+      <div id="newBoardRow" style="display: none; align-items: center; gap: 12px; flex: 1;">
+        <label style="color:var(--amber-dim); white-space: nowrap;">&gt; board_name:</label>
+        <input type="text" id="nbName" placeholder="my_board" autocomplete="off" maxlength="60"
+               style="flex: 1; min-width: 0; max-width: 260px; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 2px 0; outline: none; text-transform: none;">
+        <button id="nbCreate" style="background: transparent; border: none; color: var(--amber); cursor: pointer; font: inherit;">create</button>
+        <button id="nbCancel" style="background: transparent; border: none; color: var(--ink); cursor: pointer; font: inherit;">cancel</button>
+        <span id="nbError" style="color: var(--red);"></span>
       </div>
     </div>
     <div class="brief-footer" id="promptFooter" style="margin-top: 0; flex-shrink: 0;">
@@ -496,18 +490,6 @@
     <!-- Roles Full Page Overlay -->
     
   </main>
-
-  <dialog id="newBoardDialog">
-    <p style="color: var(--amber); margin: 0 0 14px;">&gt; new_board</p>
-    <label style="display:block; color:var(--amber-dim); margin-bottom:4px;">&gt; board_name:</label>
-    <input type="text" id="nbName" placeholder="my_board" autocomplete="off"
-           style="width:100%; background:transparent; border:0; border-bottom:1px solid var(--frame); color:var(--amber); font:inherit; padding:4px 0; outline:none;">
-    <p id="nbError" style="color: var(--red); margin: 10px 0 0; display:none;"></p>
-    <div class="modal-btns">
-      <button id="nbCreate">create</button>
-      <button id="nbCancel">cancel</button>
-    </div>
-  </dialog>
 
   <footer class="result-foot">
     <span class="verdict" id="globalStatus">idle</span>

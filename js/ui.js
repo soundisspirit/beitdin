@@ -189,12 +189,6 @@ export function initUI() {
   });
   
     
-  document.querySelectorAll('.close-dialog').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const dialogId = e.target.getAttribute('data-dialog');
-      const d = document.getElementById(dialogId); if(d.tagName==='DIALOG'){d.close();}else{d.classList.remove('open');}
-    });
-  });
 
   
 
@@ -280,28 +274,30 @@ export function initUI() {
 
   // ---- board actions: new / export / import / delete ----------------------
 
-  const dlg = document.getElementById('newBoardDialog');
+  // Naming a new board swaps the bar's controls for an inline field. No native
+  // dialog: the app's look does not allow one.
+  const boardControls = document.getElementById('boardControls');
+  const newBoardRow = document.getElementById('newBoardRow');
   const nbName = document.getElementById('nbName');
   const nbError = document.getElementById('nbError');
 
-  const showNbError = msg => {
-    nbError.textContent = msg;
-    nbError.style.display = msg ? 'block' : 'none';
+  const showNewBoardRow = on => {
+    boardControls.style.display = on ? 'none' : 'flex';
+    newBoardRow.style.display = on ? 'flex' : 'none';
+    nbError.textContent = '';
+    if (on) { nbName.value = ''; nbName.focus(); }
   };
 
-  document.getElementById('btnNewBoard')?.addEventListener('click', () => {
-    nbName.value = '';
-    showNbError('');
-    dlg.showModal();
-    nbName.focus();
-  });
-
-  document.getElementById('nbCancel')?.addEventListener('click', () => dlg.close());
+  document.getElementById('btnNewBoard')?.addEventListener('click', () => showNewBoardRow(true));
+  document.getElementById('nbCancel')?.addEventListener('click', () => showNewBoardRow(false));
 
   const createBoard = () => {
     const name = nbName.value.trim();
-    if (!name) return showNbError('name cannot be empty');
-
+    if (!name) {
+      nbError.textContent = 'name cannot be empty';
+      nbName.focus();
+      return;
+    }
     const board = {
       id: makeBoardId(name),
       name: name.slice(0, 60),
@@ -310,14 +306,17 @@ export function initUI() {
     };
     addCustomBoard(board);
     currentBoardId = board.id;
-    dlg.close();
+    showNewBoardRow(false);
     renderBoardSelect();
     updateBoardUI();
     flashStatus(`created: ${board.name}`);
   };
 
   document.getElementById('nbCreate')?.addEventListener('click', createBoard);
-  nbName?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); createBoard(); } });
+  nbName?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); createBoard(); }
+    if (e.key === 'Escape') { e.preventDefault(); showNewBoardRow(false); }
+  });
 
   document.getElementById('btnDownloadBoard')?.addEventListener('click', () => {
     const board = getBoards()[currentBoardId];
