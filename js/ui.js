@@ -1,7 +1,7 @@
 import { getBoards, saveBoards, runBoard, cancelRun, addCustomBoard, deleteCustomBoard, isBuiltInBoard } from './orchestrator.js';
 import { getActiveSlots, renderSettings, getAllSlots, pingAllSlots } from './slots.js';
 import { clearKeys } from './storage.js';
-import { LOGOS, startTamagotchis } from './logos.js';
+import { LOGOS } from './logos.js';
 
 let settingsMode = false;
 let aboutMode = false;
@@ -289,9 +289,6 @@ export function initUI() {
   });
 
   updateBoardUI();
-
-  // Lanes carry their data-provider now, so the mascots can start.
-  startTamagotchis();
 }
 
 function renderBoardSelect() {

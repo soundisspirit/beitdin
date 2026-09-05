@@ -74,6 +74,7 @@ Sovellus on jaettu selkeisiin joustaviin lohkoihin (`display: flex` ja `grid`):
 5. **Result / Footer:** Alareunassa yhteenveto ja tilapalkki.
 
 ## 5. Animoinnit
-Käytämme hyvin harkittuja, hienovaraisia CSS-animaatioita tuomaan eloa staattiseen käyttöliittymään:
-- **Bob-animaatio:** Kaistojen logot leijuvat hitaasti (`translateY`).
+Animaatioita käytetään vain siellä missä ne kertovat tilasta. Logot ovat
+staattisia: ne ovat tunnus, eivät efekti.
 - **Blink:** Striimauskursori vilkkuu karkeasti (`steps(2)`).
+- **Term-blink:** Tilarivi vilkkuu ajon ollessa käynnissä.
