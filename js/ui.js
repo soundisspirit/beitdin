@@ -134,8 +134,7 @@ export function initUI() {
     if (aboutMode) document.getElementById('btnAbout').click();
     if (rolesMode) document.getElementById('btnRoles').click();
     
-    // Optionally clear prompt? "lähtötilas" probably just means closing tabs.
-    // If they want to clear the prompt: document.getElementById('briefInput').value = '';
+    // Only the panels are closed here; the prompt text is deliberately kept.
     
     const gs = document.getElementById('globalStatus');
     gs.textContent = "Status: READY";
@@ -280,6 +279,102 @@ export function initUI() {
   });
   document.getElementById('btnDownload').addEventListener('click', downloadMarkdown);
 
+  // ---- board actions: new / export / import / delete ----------------------
+
+  const dlg = document.getElementById('newBoardDialog');
+  const nbName = document.getElementById('nbName');
+  const nbError = document.getElementById('nbError');
+
+  const showNbError = msg => {
+    nbError.textContent = msg;
+    nbError.style.display = msg ? 'block' : 'none';
+  };
+
+  document.getElementById('btnNewBoard')?.addEventListener('click', () => {
+    nbName.value = '';
+    showNbError('');
+    dlg.showModal();
+    nbName.focus();
+  });
+
+  document.getElementById('nbCancel')?.addEventListener('click', () => dlg.close());
+
+  const createBoard = () => {
+    const name = nbName.value.trim();
+    if (!name) return showNbError('name cannot be empty');
+
+    const board = {
+      id: makeBoardId(name),
+      name: name.slice(0, 60),
+      // Empty focus is fine: the roles panel is where you fill these in.
+      roles: [0, 1, 2].map(i => ({ id: i, title: `lane_${i + 1}`, focus: '' }))
+    };
+    addCustomBoard(board);
+    currentBoardId = board.id;
+    dlg.close();
+    renderBoardSelect();
+    updateBoardUI();
+    flashStatus(`created: ${board.name}`);
+  };
+
+  document.getElementById('nbCreate')?.addEventListener('click', createBoard);
+  nbName?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); createBoard(); } });
+
+  document.getElementById('btnDownloadBoard')?.addEventListener('click', () => {
+    const board = getBoards()[currentBoardId];
+    if (!board) return;
+    const blob = new Blob([JSON.stringify(board, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${board.id}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    flashStatus(`exported: ${board.name}`);
+  });
+
+  const uploadInput = document.getElementById('uploadBoardInput');
+  document.getElementById('btnUploadBoard')?.addEventListener('click', () => uploadInput?.click());
+
+  uploadInput?.addEventListener('change', async () => {
+    const file = uploadInput.files?.[0];
+    if (!file) return;
+    // Reset first, so picking the same file twice still fires a change event.
+    uploadInput.value = '';
+    const { board, error } = parseBoardFile(await file.text());
+    if (error) return flashStatus(`import failed: ${error}`, 'var(--red)', 4000);
+    addCustomBoard(board);
+    currentBoardId = board.id;
+    renderBoardSelect();
+    updateBoardUI();
+    flashStatus(`imported: ${board.name}`);
+  });
+
+  // Delete confirms in place rather than in a browser dialog: first click arms
+  // the button, second click within 4s does it.
+  const btnDelete = document.getElementById('btnDeleteBoard');
+  let deleteTimer = null;
+
+  btnDelete?.addEventListener('click', () => {
+    if (isBuiltInBoard(currentBoardId)) return;
+    if (btnDelete.dataset.armed !== '1') {
+      btnDelete.dataset.armed = '1';
+      btnDelete.textContent = 'confirm?';
+      deleteTimer = setTimeout(() => disarmDelete(btnDelete), 4000);
+      return;
+    }
+    clearTimeout(deleteTimer);
+    const name = getBoards()[currentBoardId]?.name || currentBoardId;
+    deleteCustomBoard(currentBoardId);
+    disarmDelete(btnDelete);
+    currentBoardId = Object.keys(getBoards())[0];
+    renderBoardSelect();
+    updateBoardUI();
+    flashStatus(`deleted: ${name}`, 'var(--red)');
+  });
+
   // Warn before unload if md is pending
   window.addEventListener('beforeunload', (e) => {
     if (latestMarkdown && !document.getElementById('btnDownload').disabled) {
@@ -289,6 +384,54 @@ export function initUI() {
   });
 
   updateBoardUI();
+}
+
+// Board names reach innerHTML and can come from an imported file, so they are
+// escaped rather than trusted.
+const esc = str => String(str).replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// The armed state lives on the button so anything that resets the label - a
+// board switch, a re-render - clears the state with it.
+function disarmDelete(btn) {
+  if (!btn) return;
+  delete btn.dataset.armed;
+  btn.textContent = 'delete';
+}
+
+function flashStatus(text, color = 'var(--amber)', ms = 3000) {
+  const gs = document.getElementById('globalStatus');
+  if (!gs) return;
+  gs.textContent = text;
+  gs.style.color = color;
+  setTimeout(() => { gs.textContent = 'Status: READY'; gs.style.color = ''; }, ms);
+}
+
+// A board id has to survive being used as a data-val and an object key.
+function makeBoardId(name) {
+  const base = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'board';
+  const boards = getBoards();
+  let id = base, n = 2;
+  while (boards[id]) id = `${base}_${n++}`;
+  return id;
+}
+
+// Shape check for an imported file. Anything unexpected is rejected outright
+// rather than half-loaded.
+function parseBoardFile(text) {
+  let data;
+  try { data = JSON.parse(text); } catch { return { error: 'not valid json' }; }
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return { error: 'not a board object' };
+  if (typeof data.name !== 'string' || !data.name.trim()) return { error: 'missing board name' };
+  if (!Array.isArray(data.roles) || data.roles.length !== 3) return { error: 'board needs exactly 3 roles' };
+  const roles = data.roles.map((r, i) => {
+    if (!r || typeof r !== 'object') return null;
+    if (typeof r.title !== 'string' || typeof r.focus !== 'string') return null;
+    return { id: i, title: r.title.slice(0, 120), focus: r.focus.slice(0, 8000) };
+  });
+  if (roles.some(r => r === null)) return { error: 'every role needs a title and a focus' };
+  const name = data.name.trim().slice(0, 60);
+  return { board: { id: makeBoardId(name), name, roles } };
 }
 
 function renderBoardSelect() {
@@ -303,20 +446,24 @@ function renderBoardSelect() {
   current.textContent = board ? board.name : '';
 
   options.innerHTML = Object.values(boards).map(b =>
-    `<div class="term-option ${b.id === currentBoardId ? 'selected' : ''}" data-val="${b.id}">${b.name}</div>`
+    `<div class="term-option ${b.id === currentBoardId ? 'selected' : ''}" data-val="${esc(b.id)}">${esc(b.name)}</div>`
   ).join('');
 
   options.querySelectorAll('.term-option').forEach(opt => {
     opt.addEventListener('click', () => {
       currentBoardId = opt.dataset.val;
       opt.closest('.term-select').classList.remove('open');
+      disarmDelete(document.getElementById('btnDeleteBoard'));
       renderBoardSelect();
       updateBoardUI();
     });
   });
 
   const del = document.getElementById('btnDeleteBoard');
-  if (del) del.style.display = isBuiltInBoard(currentBoardId) ? 'none' : 'inline-block';
+  if (del) {
+    del.style.display = isBuiltInBoard(currentBoardId) ? 'none' : 'inline-block';
+    disarmDelete(del);
+  }
 }
 
 export function updateBoardUI() {
@@ -426,7 +573,7 @@ function handleLaneUpdate(laneIndex, data) {
     statusElements[laneIndex].textContent = 'running...';
     statusElements[laneIndex].style.color = 'var(--amber)';
     
-    // Lisätään kursori jos puuttuu
+    // Add the streaming cursor if it is not already there
     if (!laneElements[laneIndex].classList.contains('streaming-cursor')) {
       laneElements[laneIndex].classList.add('streaming-cursor');
     }
@@ -450,10 +597,10 @@ function handleGlobalStatus(status) {
   
   if (status === 'complete' || status === 'cancelled') {
     gs.classList.remove('blinking');
-    // Lopetetaan ajo
+    // Stop the run
     cancelAnimationFrame(rAF_id);
     
-    // Varmistetaan että loput puskurista piirretään
+    // Make sure whatever is left in the buffers gets drawn
     laneBuffers.forEach((buf, i) => {
       if (buf && laneElements[i]) {
         laneElements[i].textContent += buf;
@@ -483,7 +630,7 @@ function flushLaneBuffers() {
         el.textContent += laneBuffers[i];
         laneBuffers[i] = '';
         
-        // Auto-scrollataan pohjaan
+        // Keep the lane pinned to the bottom
         const parent = el.parentElement;
         if (parent) {
           parent.scrollTop = parent.scrollHeight;
@@ -507,6 +654,6 @@ function downloadMarkdown() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   
-  // Vapautetaan ennenkuin suljetaan
+  // Release the object URL before closing
   document.getElementById('btnDownload').disabled = true;
 }

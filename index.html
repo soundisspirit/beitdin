@@ -504,6 +504,18 @@
     
   </main>
 
+  <dialog id="newBoardDialog">
+    <p style="color: var(--amber); margin: 0 0 14px;">&gt; new_board</p>
+    <label style="display:block; color:var(--amber-dim); margin-bottom:4px;">&gt; board_name:</label>
+    <input type="text" id="nbName" placeholder="my_board" autocomplete="off"
+           style="width:100%; background:transparent; border:0; border-bottom:1px solid var(--frame); color:var(--amber); font:inherit; padding:4px 0; outline:none;">
+    <p id="nbError" style="color: var(--red); margin: 10px 0 0; display:none;"></p>
+    <div class="modal-btns">
+      <button id="nbCreate">create</button>
+      <button id="nbCancel">cancel</button>
+    </div>
+  </dialog>
+
   <footer class="result-foot">
     <span class="verdict" id="globalStatus">idle</span>
     <div class="right" style="display: flex; gap: 16px;">
