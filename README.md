@@ -8,8 +8,16 @@
  ▀  ▀  ▀
 ```
 
-Three lanes. Run one brief against three models at once, each in its own role,
-and get back a single markdown document.
+Three specialists read your brief at the same time and hand you one document.
+
+Each lane holds a model *and a role*: a title and a system prompt. The same
+brief arrives at lane one as a technical architect and at lane two as a security
+expert, so the three answers are meant to complement each other, not compete.
+They compose into a single markdown file.
+
+**This is not a model comparison tool.** It is not asking which model wrote the
+better answer to the same question. The lanes are asking different questions of
+the same brief, and the output is a document rather than a scoreboard.
 
 The app is a static page. It talks straight to the provider APIs from the
 browser, with no server, no build step and no dependencies.
@@ -29,6 +37,8 @@ by side is the whole point, and that does not survive a phone.
 
 ## Features
 
+- **A role per lane, not just a model.** The lanes differ by system prompt, so
+  you get three angles on one brief instead of three attempts at one answer.
 - **Three lanes, concurrently.** One brief, three models, three roles, at once.
 - **Boards.** A board names the three roles and their system prompts. Two ship
   with the app; you can create, export, import and delete your own.
