@@ -547,20 +547,42 @@ async function startRun() {
   // Start rAF update
   rAF_id = requestAnimationFrame(flushLaneBuffers);
 
-  const resultMd = await runBoard(currentBoardId, brief, handleLaneUpdate, handleGlobalStatus);
-  
-  if (resultMd) {
-    if (latestMarkdown) {
-      latestMarkdown += "\n\n---\n\n" + resultMd;
-    } else {
-      latestMarkdown = resultMd;
+  try {
+    const resultMd = await runBoard(currentBoardId, brief, handleLaneUpdate, handleGlobalStatus);
+
+    if (resultMd) {
+      if (latestMarkdown) {
+        latestMarkdown += "\n\n---\n\n" + resultMd;
+      } else {
+        latestMarkdown = resultMd;
+      }
+      document.getElementById('btnDownload').disabled = false;
+      const btnClear = document.getElementById('btnClearRuns');
+      if (btnClear) {
+        btnClear.disabled = false;
+        btnClear.style.display = 'inline-block';
+      }
     }
-    document.getElementById('btnDownload').disabled = false;
-    const btnClear = document.getElementById('btnClearRuns');
-    if (btnClear) {
-      btnClear.disabled = false;
-      btnClear.style.display = 'inline-block';
-    }
+  } catch (e) {
+    // Without this the controls stay hidden and the rAF loop spins forever, and
+    // only a reload gets the app back.
+    console.error('run failed', e);
+    flashStatus(`error: ${e.message || 'run failed'}`, 'var(--red)', 5000);
+    statusElements.forEach(el => { if (el) el.textContent = 'failed'; });
+  } finally {
+    // Draw whatever is still buffered before stopping, so a failed run keeps the
+    // output the lanes did produce. Idempotent: the complete/cancelled path in
+    // handleGlobalStatus does the same thing.
+    laneBuffers.forEach((buf, i) => {
+      if (buf && laneElements[i]) {
+        laneElements[i].textContent += buf;
+        laneBuffers[i] = '';
+      }
+    });
+    cancelAnimationFrame(rAF_id);
+    document.getElementById('btnRun').style.display = 'inline-block';
+    document.getElementById('btnCancel').style.display = 'none';
+    document.getElementById('briefInput').disabled = false;
   }
 }
 

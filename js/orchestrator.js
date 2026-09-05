@@ -29,22 +29,49 @@ const DEFAULT_BOARDS = {
 
 let BOARDS = null;
 
+// Every read hands back a fresh copy of the shipped boards, so editing a role
+// can never reach through and mutate DEFAULT_BOARDS itself.
+function freshDefaults() {
+  return structuredClone(DEFAULT_BOARDS);
+}
+
+// A board is only usable if it has a name and exactly three roles that each
+// carry a title and a focus. Anything else in storage is ignored rather than
+// half-loaded.
+function isUsableBoard(b) {
+  return b && typeof b === 'object'
+    && typeof b.name === 'string'
+    && Array.isArray(b.roles) && b.roles.length === 3
+    && b.roles.every(r => r && typeof r.title === 'string' && typeof r.focus === 'string');
+}
+
 export function getBoards() {
   if (BOARDS) return BOARDS;
+  BOARDS = freshDefaults();
   try {
     const saved = localStorage.getItem('api_agent_boards');
     if (saved) {
-      BOARDS = JSON.parse(saved);
-      // Ensure defaults exist
-      BOARDS.architecture = DEFAULT_BOARDS.architecture;
-      BOARDS.product = DEFAULT_BOARDS.product;
-    } else {
-      BOARDS = { ...DEFAULT_BOARDS };
+      const parsed = JSON.parse(saved);
+      // Saved boards win over the defaults, including edits to the two shipped
+      // ones. Overwriting them here is what used to discard every role edit on
+      // reload.
+      for (const [id, board] of Object.entries(parsed || {})) {
+        if (isUsableBoard(board)) BOARDS[id] = { ...board, id };
+      }
     }
-  } catch(e) {
-    BOARDS = { ...DEFAULT_BOARDS };
+  } catch (e) {
+    console.warn('stored boards were unreadable, falling back to defaults', e);
+    BOARDS = freshDefaults();
   }
   return BOARDS;
+}
+
+// Put the two shipped boards back the way they came, leaving custom ones alone.
+export function resetBuiltInBoards() {
+  const boards = getBoards();
+  Object.assign(boards, freshDefaults());
+  saveBoards(boards);
+  return boards;
 }
 
 export function saveBoards(boards) {

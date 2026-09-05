@@ -2,6 +2,15 @@ import { getSlots, saveSlots } from './storage.js';
 import { getModels as getOpenAIModels } from './adapters/openai-compat.js';
 import { getModels as getGeminiModels } from './adapters/gemini.js';
 
+// This panel is built with innerHTML, and three of the values below are not
+// ours: lastError and the model ids come from whatever endpoint the lane is
+// pointed at, and baseUrl/apiKey are typed by hand. Escape everything that is
+// interpolated, both so a quote cannot break out of an attribute and so a
+// hostile endpoint cannot inject markup into the settings pane.
+const esc = str => String(str ?? '').replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+
 let currentSlots = getSlots();
 
 export function getActiveSlots() {
@@ -120,16 +129,16 @@ export function renderSettings() {
       
       <div style="margin-bottom: 16px;">
         <label style="display:block; color:var(--amber-dim); margin-bottom:4px;">> endpoint_url:</label>
-        <input type="url" id="url-${i}" value="${slot.baseUrl}" ${!slot.enabled ? 'disabled' : ''} style="width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 4px 0; outline: none; ${!slot.enabled ? 'opacity: 0.3;' : ''}">
+        <input type="url" id="url-${i}" value="${esc(slot.baseUrl)}" ${!slot.enabled ? 'disabled' : ''} style="width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 4px 0; outline: none; ${!slot.enabled ? 'opacity: 0.3;' : ''}">
       </div>
       
       <div style="margin-bottom: 16px;">
         <label style="display:block; color:var(--amber-dim); margin-bottom:4px;">> api_key:</label>
         <div style="display: flex; gap: 8px;">
-          <input type="password" id="key-${i}" value="${slot.apiKey}" placeholder="empty for local models" autocomplete="off" ${!slot.enabled ? 'disabled' : ''} style="flex: 1; min-width: 0; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 4px 0; outline: none; ${!slot.enabled ? 'opacity: 0.3;' : ''}">
+          <input type="password" id="key-${i}" value="${esc(slot.apiKey)}" placeholder="empty for local models" autocomplete="off" ${!slot.enabled ? 'disabled' : ''} style="flex: 1; min-width: 0; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 4px 0; outline: none; ${!slot.enabled ? 'opacity: 0.3;' : ''}">
           <button type="button" id="test-${i}" ${!slot.enabled || slot.status === 'testing' ? 'disabled' : ''} style="${!slot.enabled ? 'opacity: 0.3;' : ''}">${slot.status === 'testing' ? 'testing...' : 'ping'}</button>
         </div>
-        ${slot.enabled && slot.status === 'error' ? `<div style="color: var(--red); margin-top: 6px;">[error: ${slot.lastError}]</div>` : ''}
+        ${slot.enabled && slot.status === 'error' ? `<div style="color: var(--red); margin-top: 6px;">[error: ${esc(slot.lastError)}]</div>` : ''}
         ${slot.enabled && slot.status === 'ok' ? `<div style="color: var(--amber); margin-top: 6px;">[ok: ${slot.availableModels.length} models found]</div>` : ''}
       </div>
       
@@ -137,9 +146,9 @@ export function renderSettings() {
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
         <label style="color:var(--amber-dim);">> model:</label>
         <div class="term-select" id="model-select-${i}" style="margin-bottom: 0; flex: 1;">
-          <div class="term-select-current">${slot.selectedModel || 'select model...'}</div>
+          <div class="term-select-current">${esc(slot.selectedModel) || 'select model...'}</div>
           <div class="term-options">
-            ${slot.availableModels.map(m => `<div class="term-option ${m === slot.selectedModel ? 'selected' : ''}" data-val="${m}">${m}</div>`).join('')}
+            ${slot.availableModels.map(m => `<div class="term-option ${m === slot.selectedModel ? 'selected' : ''}" data-val="${esc(m)}">${esc(m)}</div>`).join('')}
           </div>
         </div>
       </div>` : `

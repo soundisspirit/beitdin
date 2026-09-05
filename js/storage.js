@@ -47,14 +47,31 @@ const DEFAULT_SLOTS = [
   }
 ];
 
+// Always a fresh copy: callers mutate what they get back, and handing out
+// DEFAULT_SLOTS itself meant the module constant ended up holding the user's
+// API key, which the recovery path below would then persist as the "defaults".
+function freshSlots() {
+  return structuredClone(DEFAULT_SLOTS);
+}
+
+// A slot is only usable if the fields the rest of the app reads are present.
+function isUsableSlot(s, i) {
+  return s && typeof s === 'object'
+    && typeof s.service === 'string'
+    && typeof s.adapterType === 'string'
+    && typeof s.baseUrl === 'string'
+    && Array.isArray(s.availableModels);
+}
+
 export function getSlots() {
-  const data = load('slots', DEFAULT_SLOTS);
-  // Ensure array is correct size
-  if (!Array.isArray(data) || data.length !== 3) {
-    save('slots', DEFAULT_SLOTS);
-    return DEFAULT_SLOTS;
+  const data = load('slots', null);
+  if (!Array.isArray(data) || data.length !== 3 || !data.every(isUsableSlot)) {
+    const fresh = freshSlots();
+    save('slots', fresh);
+    return fresh;
   }
-  return data;
+  // slotIndex drives lane routing, so never trust it from storage.
+  return data.map((s, i) => ({ ...s, slotIndex: i }));
 }
 
 export function saveSlots(slots) {
