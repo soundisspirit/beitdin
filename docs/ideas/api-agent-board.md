@@ -1,23 +1,23 @@
-# API Agent Board - Konseptin kiteytys
+# API Agent Board - concept summary
 
-## Ongelmanasettelu
-Kuinka voisimme poistaa manuaalisen copy-paste-työn tehokäyttäjiltä, jotka haluavat iteroida ideoita tai koodia samanaikaisesti kolmella eri tekoälymallilla, ja paketoida tulokset suoraan yhteen jatkojalostettavaan tiedostoon?
+## Problem statement
+How could we remove the manual copy-paste work from power users who want to iterate on ideas or code with three different AI models at once, and package the results straight into a single file that can be worked on further?
 
-## Valittu suunta
-Staattinen, selaimessa pyörivä SPA (Zero-infra, Bring Your Own Key). Työkalu sisältää 3 konfiguroitavaa kaistaa (slottia), jotka ajavat saman tehtävän rinnakkain eri malleilla (esim. OpenAI, Gemini, lokaali Ollama). Tuotokset yhdistetään ajon päätteeksi yhdeksi `.md`-dokumentiksi ladattavaksi. Työkalu on suunnattu teknisille käyttäjille ("nörteille").
+## Chosen direction
+A static, browser-resident SPA (zero infra, bring your own key). The tool has 3 configurable lanes (slots) that run the same task in parallel against different models (for example OpenAI, Gemini, a local Ollama). At the end of a run the outputs are merged into one downloadable `.md` document. The tool is aimed at technical users ("nerds").
 
-## Piilevät oletukset (Stressitesti)
-- **Oletus 1 (CORS & Lokaalit mallit):** Oletamme, että käyttäjien omat lokaalit työkalut (esim. Ollama) sallivat selaimen CORS-pyynnöt. (Vaatii mahdollisesti käyttäjältä `OLLAMA_ORIGINS="*"` -määrityksen).
-- **Oletus 2 (Markdownin hyödyllisyys):** Oletamme, että 3 mallin yhdistetty `.md`-tiedosto (Compose-vaihe) on rakenteeltaan suoraan käyttökelpoinen seuraavalle tekoälylle ilman merkittävää manuaalista siivoamista.
+## Hidden assumptions (stress test)
+- **Assumption 1 (CORS and local models):** We assume that users' own local tools (for example Ollama) allow CORS requests from the browser. (This may require the user to set `OLLAMA_ORIGINS="*"`.)
+- **Assumption 2 (usefulness of the markdown):** We assume that the merged `.md` file from 3 models (the compose step) is structured well enough to feed straight into the next AI without significant manual cleanup.
 
-## MVP Scope (Mitä rakennetaan ensimmäisenä)
-- 3 rinnakkaista kaistaa suoralla avain/url-konfiguraatiolla (tallennus localStorageen).
-- `openai-compat` ja `gemini` -adapterit.
-- Synkroninen yhdistämisvaihe (Compose), joka tuottaa `.md`-tiedoston.
-- Yksinkertainen, mutta sulava striimaava UI (Typewriter-efekti ja `requestAnimationFrame` -optimointi).
+## MVP scope (what gets built first)
+- 3 parallel lanes with direct key/url configuration (persisted to localStorage).
+- `openai-compat` and `gemini` adapters.
+- A synchronous merge step (compose) that produces the `.md` file.
+- A simple but smooth streaming UI (typewriter effect and `requestAnimationFrame` batching).
 
-## Not Doing (Mitä EI tehdä ja miksi)
-- **Ei palvelinta tai tilejä:** Nostaisi ylläpitokustannukset nollasta maksulliseksi ja toisi tietoturvavastuita.
-- **Ei monimutkaista Agentti-orkestraatiota:** Kaistat eivät keskustele ristiin (vähentää API-kuluja ja latenssia, pitää arkkitehtuurin yksinkertaisena).
-- **Ei yli kolmea slottia:** Kolme on visuaalisesti maksimi, joka mahtuu siististi työpöytänäytölle ilman horisontaalista scrollausta.
-- **Ei prompt-historian tallennusta (localStorageen):** Maksimoi tietosuojan ja estää selaimen muistin täyttymisen.
+## Not doing (what we are NOT building, and why)
+- **No server or accounts:** Would raise running costs from zero to paid and bring security obligations with it.
+- **No complex agent orchestration:** Lanes do not talk to each other (keeps API cost and latency down, keeps the architecture simple).
+- **No more than three slots:** Three is the visual maximum that fits a desktop screen cleanly without horizontal scrolling.
+- **No prompt history in localStorage:** Maximises privacy and stops the browser store from filling up.

@@ -114,7 +114,7 @@ export async function runBoard(boardId, brief, onLaneUpdate, onStatusChange) {
       
       let laneText = "";
       
-      // Kutsutaan adapterin async generaattoria
+      // Drive the adapter's async generator
       try {
         const stream = adapterCall(slot, systemPrompt, brief, null, controller.signal);
         
@@ -138,7 +138,7 @@ export async function runBoard(boardId, brief, onLaneUpdate, onStatusChange) {
       }
     });
 
-    // Odotetaan että kaikki lanet ovat valmiit (Promise.allSettled)
+    // Wait for every lane to settle, successes and failures alike
     await Promise.allSettled(lanePromises);
 
     if (!isRunning) {
@@ -147,7 +147,7 @@ export async function runBoard(boardId, brief, onLaneUpdate, onStatusChange) {
       return null;
     }
 
-    // COMPOSE VAIHE: Yhdistetään markdown-dokumentiksi
+    // COMPOSE STEP: fold the lane results into one markdown document
     let markdown = `# API Agent Board Result\n\n**Board:** ${board.name}\n**Brief:**\n> ${brief.split('\\n').join('\\n> ')}\n\n---\n\n`;
     
     finalResults.forEach((res, i) => {

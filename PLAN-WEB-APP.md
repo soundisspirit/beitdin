@@ -15,20 +15,20 @@ staattinen SPA (ES modules, ei bundleria)
   └── gemini -adapteri → Google Gemini
 ```
 
-- Ei serveria, ei proxya, ei tietokantaa, ei kirjautumista
-- Ei tallenneta mitaan kayttajadataa palvelimelle
+- No server, no proxy, no database, no login
+- No user data is ever stored on a server
 - Hostaus: GitHub Pages, Cloudflare Pages, Vercel, Netlify - mika tahansa
 - Nolla npm-riippuvuuksia, nolla build-steppeja
 
 ## Slot-pohjainen konfiguraatio
 
-Sen sijaan että käyttäjä loisi erillisen "palveluntarjoajien rekisterin", konfigurointi tehdään suoraan kolmelle olemassa olevalle slotille (Lane 1, Lane 2, Lane 3). 
+Instead of the user creating a separate "provider registry", configuration happens directly on the three existing slots (Lane 1, Lane 2, Lane 3).
 
-Käyttöliittymässä kukin slotti konfiguroidaan suoraviivaisesti:
-1. **Palvelun valinta (Endpoint):** Käyttäjä valitsee pudotusvalikosta valmiin (esim. OpenAI, Gemini) tai "Custom" (esim. lokaali Ollama), jolloin hän syöttää oman URL:n.
-2. **API-avain:** Käyttäjä syöttää avaimen (tai jättää tyhjäksi lokaaleille).
+In the UI each slot is configured in a straightforward way:
+1. **Service selection (endpoint):** The user picks a preset from a dropdown (for example OpenAI, Gemini) or "Custom" (for example a local Ollama), in which case they enter their own URL.
+2. **API key:** The user enters a key (or leaves it empty for local models).
 3. **Testaus:** Sovellus testaa yhteyden ja hakee saatavilla olevat mallit (Model discovery).
-4. **Mallin valinta:** Käyttäjä valitsee haluamansa mallin listalta.
+4. **Model selection:** The user picks the model they want from the list.
 
 Kaksi adapteriprotokollaa kattavat kaiken:
 
@@ -47,7 +47,7 @@ Yhden slotin tietorakenne (`localStorage`):
   baseUrl: "https://api.openai.com/v1",
   apiKey: "sk-...",                // tyhja sallittu (Ollama, LM Studio)
   adapterType: "openai-compat",    // "openai-compat" | "gemini"
-  availableModels: [],             // taytetaan model discoveryllä
+  availableModels: [],             // filled in by model discovery
   selectedModel: "gpt-4o",
   status: "untested",              // "untested" | "ok" | "error"
   lastError: null                  // viimeisin virheviesti
@@ -65,22 +65,22 @@ muutos asetuksiin -> untested (vaatii testin)
 ```
 
 - URL:n, palvelun tai avaimen muutos -> status palaa `untested`
-- Model discovery epaonnistuminen ei esta tallennusta - kayttaja voi tällöin syottaa mallin nimen kasin.
+- A failed model discovery does not block saving: the user can type the model name by hand instead.
 
 ### URL-validointi ja Custom Providerit
 
 - `https://` pakollinen
 - Poikkeus: `http://localhost` ja `http://127.0.0.1` sallittu lokaaleille LLM:ille
-- API-avaimen max pituus 2048 merkkia
-- **Tietoturvavaroitus:** Kun käyttäjä valitsee palveluksi "Custom" ja syöttää epävirallisen osoitteen, käyttöliittymä näyttää selkeän varoituksen: *"Varoitus: API-avaimesi ja kaikki syöttämäsi data lähetetään tähän osoitteeseen. Käytä vain osoitteita, joihin luotat."* Tämä ehkäisee huijaus-proxyjen käyttöä (Social Engineering).
+- API key max length 2048 characters
+- **Security warning:** When the user picks "Custom" as the service and enters an unofficial address, the UI shows a clear warning: *"Warning: your API key and everything you type is sent to this address. Only use addresses you trust."* This guards against proxy-based social engineering.
 
 ### Model discovery
 
-Kun kayttaja asettaa API-avaimen ja painaa "Test":
+When the user sets an API key and presses "Test":
 1. **openai-compat**: `GET {baseUrl}/models` -> parsitaan `data[].id`
 2. **gemini**: `GET {baseUrl}/models?key={apiKey}` -> parsitaan `models[].name`
 3. Status paivittyy "ok" tai "error" + virheilmoitus
-4. Jos OK, pudotusvalikkoon päivittyvät löydetyt mallit.
+4. If it succeeds, the dropdown is populated with the discovered models.
 
 ### Adapter-rajapinta
 
@@ -95,18 +95,18 @@ Async generator mahdollistaa typewriter-renderonnin ilman callback-sotkua.
 
 ## Avainten hallinta ja turvallisuus
 
-Koska kyseessä on staattinen SPA ilman backendia, kymmenet perinteiset hyökkäysvektorit (kuten tietokantainjektiot, palvelimen SSRF ja riippuvuuksien toimitusketjuhyökkäykset) on eliminoitu "by-design".
+Because this is a static SPA with no backend, dozens of traditional attack vectors (database injection, server-side SSRF, dependency supply chain attacks) are eliminated by design.
 
 ### Tallennus
 
 API-avaimet tallennetaan localStorageen osana slot-konfiguraatiota plaintextina.
-Encrypt-without-server ei tuo lisaturvaa koska salausavain olisi samassa selaimessa.
+Encrypt-without-server adds no real protection, because the encryption key would sit in the same browser.
 
 Avainkentta on `type="password"`, `autocomplete="off"`.
-UI ei koskaan nayta avainta kokonaan.
+The UI never shows the key in full.
 
 Avaimet eivat koskaan:
-- Lahde mihinkaan muualle kuin suoraan määritettyyn API-endpointiin
+- Send anywhere other than directly to the configured API endpoint
 - Paady URL-parametreihin (paitsi Gemini, jossa `Referrer-Policy: no-referrer`)
 - Nayteta virheviestissa, lokissa tai exportoidussa markdownissa
 - Tallennu DOM:iin nakyvan tekstina
@@ -114,10 +114,10 @@ Avaimet eivat koskaan:
 ### Tietoturvaperiaatteet
 
 - **CSP-politiikka**: `default-src 'self'; script-src 'self'; style-src 'self'; connect-src https: http://localhost:* http://127.0.0.1:*; frame-ancestors 'none'; form-action 'none'`
-  *Huom:* `connect-src` on tarkoituksella höllennetty sallimaan `https:` ja lokaalit portit. Koska staattinen SPA ei voi dynaamisesti muokata CSP:tä käyttäjän lisäämien custom-endpointien (kuten lokaali Ollama) perusteella, tiukka whitelist estäisi niiden käytön selaimen tasolla CORSista riippumatta. Nollan riippuvuuden arkkitehtuurissa tämä on hyväksyttävä kompromissi.
-- **Referrer-Policy (Gemini API -suojaus)**: HTML:n `<head>`-osiossa on `<meta name="referrer" content="no-referrer">`. Tämä estää Geminin URL:ssä sijaitsevan API-avaimen vuotamisen `Referer`-otsakkeessa.
-- **Ei kolmannen osapuolen skripteja**: ei analytiikkaa, ei CDN-kirjastoja, ei fontti-CDN:ia.
-- **XSS-suojaus (LLM05-torjunta)**: Kaikki kayttaja- ja mallisisalto (LLM:n palauttamat vastaukset) renderoidaan **yksinomaan** `textContent`:lla, ei koskaan `innerHTML`:lla. 
+  *Note:* `connect-src` is deliberately loosened to allow `https:` and local ports. Because a static SPA cannot rewrite its own CSP based on custom endpoints the user adds (such as a local Ollama), a strict allowlist would block those at the browser level regardless of CORS. In a zero-dependency architecture this is an acceptable trade-off.
+- **Referrer-Policy (Gemini API protection)**: The HTML `<head>` carries `<meta name="referrer" content="no-referrer">`. This stops the API key that sits in the Gemini URL from leaking through the `Referer` header.
+- **No third-party scripts**: no analytics, no CDN libraries, no font CDN.
+- **XSS protection (LLM05 mitigation)**: all user and model content (responses returned by the LLM) is rendered **exclusively** with `textContent`, never with `innerHTML`.
 - **Ei iframea**: `frame-ancestors 'none'`
 - **HTTPS only**: HTTP:ta ei tueta tuotannossa (paitsi lokaalille `localhostille`).
 
@@ -125,7 +125,7 @@ Avaimet eivat koskaan:
 
 - "Tyhjenna avaimet": nollaa muistissa olevat avaimet ja keskeyttaa kaynissa olevat pyynnot
 - "Tyhjenna paikalliset tiedot": poistaa kaikki `apb_`-avaimet localStoragesta, kaksivaiheinen vahvistus.
-- **Tietosuoja:** Briefia ja LLM:n palauttamia vastauksia ei koskaan tallenneta localStorageen. Nämä elävät vain muistissa ja häviävät sivun päivityksessä.
+- **Privacy:** The brief and the responses returned by the LLM are never written to localStorage. They live only in memory and are gone on reload.
 
 ## Orkestraatio
 
@@ -145,7 +145,7 @@ Sama pipeline kuin nykyinen Python-backend, JavaScriptilla:
     v
 2. FAN-OUT (Promise.allSettled, rinnakkaiset kutsut)
     |  Kukin aktiivinen slot saa: board-roolin prompt + shared ground + brief
-    |  Kukin palauttaa: JSON-schemaa vasten validoitu vastaus
+    |  Each returns: a response validated against the JSON schema
     |
     v
 3. COMPOSE (synkroninen)
@@ -158,7 +158,7 @@ Sama pipeline kuin nykyinen Python-backend, JavaScriptilla:
 
 Ajon parametrit jaadytetaan kaynnistyksessa. Asetusmuutokset ajon aikana eivat vaikuta kaynissa olevaan ajoon.
 
-`Promise.allSettled` on kriittinen: yksittaisen lanen virhe ei kaada muita.
+`Promise.allSettled` is essential: a failure in one lane must not bring down the others.
 
 Jokainen kutsu saa oman `AbortController`-instanssin 90s timeoutilla.
 Cancel-nappi abortoi kaikki kaynissa olevat kutsut.
@@ -169,9 +169,9 @@ Cancel-nappi abortoi kaikki kaynissa olevat kutsut.
 idle -> contract -> fanout -> composing -> complete | partial | failed | cancelled
 ```
 
-- Uutta ajoa ei kaynnisteta kun edellinen on kaynissa
+- A new run is not started while the previous one is still going
 - Cancel on idempotentti: abortoi controllerit, merkitsee lanet peruutetuiksi
-- Myohassa saapuvat deltat hylätaan runId-tarkistuksella
+- Deltas that arrive late are discarded by a runId check
 
 ## Streaming
 
@@ -189,35 +189,35 @@ while (true) {
 }
 ```
 
-SSE-parseri on oma funktio (~30 rivia), ei kirjastoa. EventSource-APIa ei kayteta koska
-POST-kutsut eivat tue sita.
+The SSE parser is its own function (~30 lines), not a library. The EventSource API is not used because
+POST requests are not supported by it.
 
 ### DOM-paivitykset
 
 Streaming-deltat puskuroidaan ja renderoidaan `requestAnimationFrame`-syklissa.
-Enintaan yksi DOM-paivitys per frame per lane.
+At most one DOM update per frame per lane.
 
 ## Boardit
 
 - Kaksi built-in boardia (Architecture, Product) - kovakoodattu JS:aan
 - Custom boardit localStorageen JSON-arrayna
 - Board = nimi + 3 roolia (title + focus per rooli)
-- Custom boardin voi poistaa (vahvistus-dialogi), built-in ei
+- A custom board can be deleted (with a confirmation step), a built-in one cannot
 - Max 100 custom boardia
 - Boardin nimi uniikki (case-insensitive)
 
 ## Brief
 
-- Minimipituus: 10 merkkia (run disabled jos lyhyempi)
-- Maksimipituus: 12 000 merkkia (kentta estaa lisasyoton)
+- Minimum length: 10 characters (run disabled below that)
+- Maximum length: 12,000 characters (the field blocks further input)
 - Merkkilaskuri nakyy kentan alla
 
 ## UI
 
 Sailytetaan nykyisesta:
 - Titlebar: nimi, about-sivu, agents-sivu, shuffle, run
-  - **About-sivun sisältö (Arvolupaus):** "Käyttäjäarvo (User value): Erittäin korkea kohderyhmälle. Tämä on "särkylääke" siihen copy-paste-uupumukseen, kun joudut avaamaan ChatGPT:n, Clauden ja Geminin eri välilehdille saadaksesi usean mallin näkemyksen koodiarkkitehtuuriin tai ideaan. Yksi klikkaus, kolme aivoa, yksi tiedosto."
-- Kolme lanea block-logoilla ja typewriter-efektilla
+  - **About page content (value proposition):** "User value: very high for the target audience. This is the painkiller for the copy-paste fatigue of opening ChatGPT, Claude and Gemini in three tabs just to get several models' takes on a code architecture or an idea. One click, three brains, one file."
+- Three lanes with block marks and a typewriter effect
 - Footer: status-animaatio (running.../complete/failed) + download .md
 - New board -modal
 
@@ -225,12 +225,12 @@ Lisataan / Muutetaan:
 - Settings-paneeli (gear-ikoni)
   - **Slot 1, 2 ja 3 konfiguraatiot suoraan allekkain**
   - Palvelun valinta (OpenAI, Gemini, Mistral, Custom)
-  - API-avaimen syöttö ja "Test"-nappi
+  - API key entry and a "Test" button
   - Mallin valinta pudotusvalikosta
   - "Tyhjenna avaimet" ja "Tyhjenna paikalliset tiedot" -napit
 - Cancel-nappi ajon aikana
-- `beforeunload`-varoitus kun complete + ei ladattu .md:ta
-- Run-napin disabled-tila syyselityksella ("ei aktiivisia slotteja" / "briifi on tyhja")
+- A `beforeunload` warning when a run is complete and the .md has not been downloaded
+- The run button carries a disabled state with a reason ("no active slots" / "brief is empty")
 - Logot dynaamisesti slotin palvelun nimeen perustuvat
 - Modaalit `<dialog>` + `showModal()` (natiivi focus trap)
 
@@ -245,9 +245,9 @@ Lisataan / Muutetaan:
 | Verkkovirhe | TypeError | "no network connection" | 0 |
 | JSON parse | 200 invalid | Retry tiukemmalla promptilla | 1 |
 | Contract-virhe | mika tahansa | Jatka ilman shared groundia | 0 |
-| Ei aktiivisia slotteja | - | Asetukset-näkymä, run disabled | - |
+| No active slots | - | Settings view, run disabled | - |
 
-Retry on adapterissa, ei orkestraattorissa. Samat parametrit, uusi request.
+Retry lives in the adapter, not the orchestrator. Same parameters, new request.
 Yksi ajo tekee enintaan 8 kutsua: 4 alkuperaista + enintaan 4 korjausyrittysta.
 
 ## Tietomalli (localStorage)
@@ -261,7 +261,7 @@ Yksi ajo tekee enintaan 8 kutsua: 4 alkuperaista + enintaan 4 korjausyrittysta.
 
 Kaikki avaimet `apb_`-prefixilla. `QuotaExceededError` kasitellaan.
 
-`storage.js` validoi luetun arvon. Virheellinen tai vanhan skeeman arvo korvataan turvallisella oletuksella ja kirjataan lokiin. Kirjoitus on atominen.
+`storage.js` validates what it reads. An invalid value, or one from an older schema, is replaced with a safe default and logged. Writes are atomic.
 
 ## Havainnointi
 
@@ -274,9 +274,9 @@ Rengaspuskuri (200 tapahtumaa) muistissa:
 Nakyy kayttajalle:
 - Footer: per-lane tila, kokonaisaika, tokenit
 - Settings -> Debug: viimeisimmat 50 tapahtumaa
-- `console.debug()` jokaisesta tapahtumasta (HUOM: Varmista, ettei API-avaimia vuodeta debug-lokiin missään muodossa.)
+- `console.debug()` for every event (NOTE: make sure API keys never leak into the debug log in any form.)
 
-Ei ulkoista telemetriaa, ei analytiikkaa. Kustannus: 0 EUR.
+No external telemetry, no analytics. Cost: 0 EUR.
 
 ## Tiedostorakenne
 

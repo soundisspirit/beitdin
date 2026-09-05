@@ -68,7 +68,7 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
     return;
   }
 
-  // Gemini palauttaa JSON-arrayn (Server-Sent Events:n sijaan array of objects, mutta stream on usein chunked JSON.
+  // Gemini returns a JSON array (an array of objects rather than Server-Sent Events), though the stream is often chunked JSON.
   // Gemini's streamGenerateContent actually returns an array of chunks like:
   // [
   //   { "candidates": [ { "content": { "parts": [ { "text": "..." } ] } } ] },
@@ -116,7 +116,7 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
       }
     }
     
-    // Yritetään kaivaa usageMetaData kokonaisesta bufferista (Gemini liittää sen vikaan chunkkiin)
+    // Dig usageMetadata out of the whole buffer: Gemini attaches it to the last chunk
     try {
       // Clean up the JSON array syntax to parse it fully
       const completeJson = JSON.parse(buffer.trim().replace(/^,\s*/, ''));
@@ -152,7 +152,7 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
  * Model discovery funktio
  */
 export async function getModels(baseUrl, apiKey) {
-  if (!apiKey) throw new Error("API-avain vaaditaan Geminille.");
+  if (!apiKey) throw new Error("Gemini requires an API key.");
   
   const endpoint = `${baseUrl.replace(/\/$/, '')}/models?key=${apiKey}`;
   
@@ -165,10 +165,10 @@ export async function getModels(baseUrl, apiKey) {
   const data = await response.json();
   
   if (!data.models || !Array.isArray(data.models)) {
-    throw new Error('Vastaus ei sisältänyt odotettua models-taulukkoa.');
+    throw new Error('Response did not contain the expected models array.');
   }
   
-  // Gemini palauttaa malleja tyyliin "models/gemini-1.5-pro", poistetaan etuliite
+  // Gemini returns ids like "models/gemini-1.5-pro"; strip the prefix
   return data.models
     .filter(m => m.supportedGenerationMethods.includes("generateContent"))
     .map(model => model.name.replace('models/', ''));

@@ -1,6 +1,7 @@
 /**
- * Yksinkertainen, atomaarinen localStorage-kääre.
- * Validoi ja tarjoaa oletusarvot, jos data puuttuu tai on korruptoitunut.
+ * A small atomic localStorage wrapper.
+ * Validates what it reads and falls back to defaults when data is missing
+ * or corrupt.
  */
 
 const PREFIX = 'apb_';
@@ -97,7 +98,7 @@ function save(keySuffix, value) {
     localStorage.setItem(PREFIX + keySuffix, JSON.stringify(value));
   } catch (e) {
     if (e.name === 'QuotaExceededError') {
-      alert('Selaimesi paikallinen tallennustila on täynnä.');
+      alert('Your browser local storage is full.');
     }
     console.error(`LocalStorage write failed for ${keySuffix}`, e);
   }

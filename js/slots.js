@@ -92,7 +92,7 @@ export async function pingAllSlots() {
 }
 
 /**
- * Renderöi asetuspaneelin sisällön
+ * Render the contents of the settings panel
  */
 export function renderSettings() {
   currentSlots.forEach((slot, i) => {

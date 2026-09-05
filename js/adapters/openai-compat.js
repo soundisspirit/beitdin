@@ -6,7 +6,7 @@
 export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, signal) {
   const { baseUrl, apiKey, selectedModel } = slotConfig;
   
-  // Varmistetaan /chat/completions suffix
+  // Make sure the /chat/completions suffix is present
   const endpoint = baseUrl.endsWith('/chat/completions') 
     ? baseUrl 
     : baseUrl.replace(/\/$/, '') + '/chat/completions';
@@ -26,7 +26,7 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
       { role: 'user', content: userPrompt }
     ],
     stream: true,
-    // Pakotetaan JSON jos schema on annettu (ja palvelin tukee)
+    // Force JSON when a schema is given, if the server supports it
     ...(jsonSchema ? { response_format: { type: "json_object" } } : {})
   };
 
@@ -67,14 +67,14 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
   }
 
   // Read stream MDN style
-  // Lähde: https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams#reading_the_stream
+  // Source: https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams#reading_the_stream
   const reader = response.body.getReader();
   const decoder = new TextDecoder("utf-8");
   let buffer = "";
   
   let fullText = "";
   const startTime = performance.now();
-  let tokensIn = 0; // Jos provider lähettää nämä streamissa
+  let tokensIn = 0; // Populated only if the provider sends usage in the stream
   let tokensOut = 0;
 
   try {
@@ -87,7 +87,7 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
       
       buffer += decoder.decode(value, { stream: true });
       
-      // Parsitaan SSE-chunkit: "data: {...}\n\n"
+      // Parse SSE chunks of the form "data: {...}\n\n"
       let chunkEnd = buffer.indexOf('\n\n');
       while (chunkEnd !== -1) {
         const chunk = buffer.substring(0, chunkEnd).trim();
@@ -96,7 +96,7 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
         if (chunk.startsWith('data: ')) {
           const dataStr = chunk.substring(6);
           if (dataStr === '[DONE]') {
-            // Striimi päättyi OpenAI-standardin mukaisesti
+            // Stream finished per the OpenAI convention
             break;
           }
           
@@ -123,7 +123,7 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
     
     // Viimeinen decode ilman stream-lippua
     buffer += decoder.decode();
-    // (Jätetään puskuriin mahdollisesti jäänyt vajaa rivi huomioimatta tässä yksinkertaistetussa versiossa)
+    // Any trailing partial line left in the buffer is intentionally ignored
     
     const latencyMs = Math.round(performance.now() - startTime);
     
@@ -170,7 +170,7 @@ export async function getModels(baseUrl, apiKey) {
   const data = await response.json();
   
   if (!data.data || !Array.isArray(data.data)) {
-    throw new Error('Vastaus ei sisältänyt odotettua data-taulukkoa.');
+    throw new Error('Response did not contain the expected data array.');
   }
   
   return data.data.map(model => model.id);
