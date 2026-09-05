@@ -82,10 +82,21 @@
       cursor: pointer;
       text-transform: lowercase;
     }
-    button::before { content: "["; }
-    button::after { content: "]"; }
-    button:hover:not(:disabled) { background: #000; color: var(--amber); }
+    button::before, a.btn::before { content: "["; }
+    button::after, a.btn::after { content: "]"; }
+    button:hover:not(:disabled), a.btn:hover { background: #000; color: var(--amber); }
     button:disabled { opacity: .45; cursor: default; }
+
+    /* An outbound link that reads as one of the app's buttons. */
+    a.btn {
+      background: none;
+      border: 0;
+      padding: 1px 3px;
+      color: var(--ink);
+      cursor: pointer;
+      text-transform: lowercase;
+      text-decoration: none;
+    }
 
     .titlebar button { color: #000; }
     .titlebar button:hover:not(:disabled) { background: #000; color: var(--amber); }
@@ -504,6 +515,7 @@
     <div class="right" style="display: flex; gap: 16px;">
       <button id="btnClearRuns" disabled style="display: none; color: var(--red);">clear_runs</button>
       <button id="btnDownload" disabled>download .md</button>
+      <a class="btn" href="https://www.buymeacoffee.com/soundisspirit" target="_blank" rel="noopener noreferrer">buy_me_a_coffee</a>
     </div>
   </footer>
 
