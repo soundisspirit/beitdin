@@ -232,6 +232,20 @@
     
     .right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
 
+    /* Cookie consent, the bottom-most row until it is answered */
+    .consent-bar {
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 16px;
+      height: var(--bar-h);
+      border-top: 1px solid var(--frame);
+      background: var(--bg);
+      color: var(--ink);
+    }
+    .consent-bar .actions { margin-left: auto; display: flex; gap: 16px; }
+
     /* Full Page Overlays (for Roles / About) */
     .page-bg {
       display: none;
@@ -498,7 +512,7 @@
           <p>- no build step, pure vanilla js<br>- sse streaming with native fetch<br>- local storage persistence<br>- parallel promise fan-out execution</p>
 
           <p style="color: var(--amber); margin-top: 22px;">> privacy</p>
-          <p>your brief and every model response live in memory only. nothing about a run is written to disk, and reloading the page loses it.<br><br>local storage holds two things and nothing else: your lane setup (endpoints, model names, api keys) and your boards (role names and system prompts).<br><br>no analytics, no telemetry, no cookies, no third party scripts. the page loads nothing it does not ship itself.<br><br>your brief goes to exactly one place per lane: the api endpoint you configured. there is nothing in between, because there is no server.</p>
+          <p>your brief and every model response live in memory only. nothing about a run is written to disk, and reloading the page loses it.<br><br>local storage holds two things and nothing else: your lane setup (endpoints, model names, api keys) and your boards (role names and system prompts).<br><br>traffic analytics runs only if you press accept on the cookie banner. decline and nothing is loaded and no cookie is set, and the answer is remembered so you are not asked again. clearing the app's local data resets that answer and the banner returns.<br><br>beyond that the page carries no telemetry and no other third party scripts, and loads nothing it does not ship itself.<br><br>your brief goes to exactly one place per lane: the api endpoint you configured. there is nothing in between, because there is no server.</p>
 
           <p style="color: var(--amber); margin-top: 22px;">> security</p>
           <p><span style="color: var(--red);">api keys sit in local storage in plain text.</span> anything able to run javascript on this origin can read them. that is the price of having no backend to hold them for you. use keys you can revoke.<br><br>the page ships a content security policy. script-src 'self' blocks inline and third party javascript. frame-ancestors 'none' stops the page being framed. form-action 'none' means nothing can be posted anywhere.<br><br>connect-src is deliberately wide, allowing https and localhost ports, because a static page cannot rewrite its own policy to cover a custom endpoint you type in. the trade is on you: a lane sends your key to whatever url you point it at, so only point it somewhere you trust.<br><br>referrer-policy is no-referrer. gemini carries its key in the url, and this keeps that url out of the referer header.<br><br>model output is written with textContent, never innerHTML, so a response cannot inject markup into the page. the same goes for the settings panel: the model list and error text your endpoint returns are escaped before display.</p>
@@ -514,10 +528,18 @@
     <span class="verdict" id="globalStatus">idle</span>
     <div class="right" style="display: flex; gap: 16px;">
       <button id="btnClearRuns" disabled style="display: none; color: var(--red);">clear_runs</button>
-      <button id="btnDownload" disabled>download .md</button>
       <a class="btn" href="https://www.buymeacoffee.com/soundisspirit" target="_blank" rel="noopener noreferrer">buy_me_a_coffee</a>
+      <button id="btnDownload" disabled>download .md</button>
     </div>
   </footer>
+
+  <div class="consent-bar" id="consentBar" hidden>
+    <span>this website uses cookies to analyze traffic and improve user experience.</span>
+    <div class="actions">
+      <button id="consentAccept">accept</button>
+      <button id="consentDecline">decline</button>
+    </div>
+  </div>
 
   
 
