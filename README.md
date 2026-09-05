@@ -46,6 +46,11 @@ Use keys you can revoke, and do not host this on a shared origin.
 The brief and the model responses are never persisted. They live in memory and
 are gone on reload.
 
+Nothing in the page tracks you: no analytics, no telemetry, no cookies, no third
+party scripts. There is no consent banner because there is nothing to consent
+to. Whatever server hosts the page will write an ordinary access log, as every
+web server does, and that is the only record a visit leaves.
+
 The page ships a CSP that blocks inline and third-party script. `connect-src` is
 deliberately wide (`https:` plus localhost ports) because a static page cannot
 rewrite its own policy to cover whatever custom endpoint you type in.
