@@ -32,6 +32,10 @@ let rAF_id = null;
 // Board state
 let currentBoardId = 'architecture';
 
+// True once a run has produced results, until they are cleared or a new run
+// starts. While set, updateBoardUI leaves the lane status lines alone.
+let laneStatusHeld = false;
+
 export function initUI() {
   renderBoardSelect();
 
@@ -250,6 +254,7 @@ export function initUI() {
     });
     
     // Reset statuses to waiting or disabled
+    laneStatusHeld = false;
     const activeSlots = getActiveSlots();
     statusElements.forEach((el, i) => {
       if(el) {
@@ -503,7 +508,7 @@ export function updateBoardUI() {
         if (r) r.style.opacity = enabled ? '1' : '0.3';
         const s = statusElements[i];
         if (s) {
-          s.textContent = enabled ? 'waiting' : 'disabled';
+          if (!laneStatusHeld) s.textContent = enabled ? 'waiting' : 'disabled';
           s.style.opacity = enabled ? '1' : '0.3';
         }
       }
@@ -531,6 +536,7 @@ async function startRun() {
   }
 
   // Reset UI
+  laneStatusHeld = false;
   laneBuffers.fill('');
   laneElements.forEach(el => {
     if(el) el.textContent = '';
@@ -560,6 +566,7 @@ async function startRun() {
       } else {
         latestMarkdown = resultMd;
       }
+      laneStatusHeld = true;
       document.getElementById('btnDownload').disabled = false;
       const btnClear = document.getElementById('btnClearRuns');
       if (btnClear) {

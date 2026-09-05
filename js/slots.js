@@ -58,12 +58,21 @@ export async function testSlot(index) {
       selectedModel = models[0];
     }
     
-    updateSlot(index, { 
-      status: 'ok', 
-      availableModels: models,
-      selectedModel: selectedModel,
-      lastError: null
-    });
+    if (models.length === 0) {
+      updateSlot(index, {
+        status: 'error',
+        availableModels: [],
+        selectedModel: '',
+        lastError: 'endpoint returned no models'
+      });
+    } else {
+      updateSlot(index, {
+        status: 'ok',
+        availableModels: models,
+        selectedModel: selectedModel,
+        lastError: null
+      });
+    }
     
   } catch (error) {
     console.error(`Slot ${index} test failed:`, error);
@@ -209,27 +218,30 @@ export function renderSettings() {
       });
     }
     
+    // These save on input and deliberately do not re-render. Rendering rebuilds
+    // the panel's innerHTML, and doing that from a blur/change handler destroys
+    // the ping button between mousedown and mouseup, so the click never lands.
     const urlEl = document.getElementById(`url-${i}`);
     if (urlEl) {
-      urlEl.addEventListener('change', (e) => {
-        updateSlot(i, { 
-          baseUrl: e.target.value.trim(), 
+      urlEl.addEventListener('input', (e) => {
+        updateSlot(i, {
+          baseUrl: e.target.value.trim(),
           status: 'untested',
           availableModels: [],
           selectedModel: ''
-        });
+        }, false);
       });
     }
-    
+
     const keyEl = document.getElementById(`key-${i}`);
     if (keyEl) {
-      keyEl.addEventListener('change', (e) => {
-        updateSlot(i, { 
-          apiKey: e.target.value.trim(), 
+      keyEl.addEventListener('input', (e) => {
+        updateSlot(i, {
+          apiKey: e.target.value.trim(),
           status: 'untested',
           availableModels: [],
           selectedModel: ''
-        });
+        }, false);
       });
     }
     

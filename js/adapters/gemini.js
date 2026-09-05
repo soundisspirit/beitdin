@@ -2,6 +2,18 @@
  * Google Gemini adapter
  */
 
+// The stream is scraped with a regex rather than parsed, so the captured text is
+// still JSON-escaped. Wrapping it in quotes and letting JSON.parse decode it
+// handles every escape the spec defines, not just the three we thought of.
+function unescapeJsonString(raw) {
+  try {
+    return JSON.parse('"' + raw + '"');
+  } catch {
+    // A chunk can split mid-escape; fall back to the raw text rather than lose it.
+    return raw;
+  }
+}
+
 export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, signal) {
   const { baseUrl, apiKey, selectedModel } = slotConfig;
   
@@ -104,8 +116,11 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
         
         let newFullText = "";
         for (const match of textMatches) {
-           // Replace escaped newlines and quotes
-           newFullText += match[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+           // Let JSON do the unescaping. The previous hand-rolled chain ran \n
+           // before \\, so an escaped backslash followed by n turned into a
+           // backslash plus a real newline, and \t, \r and \uXXXX were never
+           // decoded at all.
+           newFullText += unescapeJsonString(match[1]);
         }
         
         if (newFullText.length > fullText.length) {

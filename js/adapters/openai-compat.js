@@ -78,6 +78,10 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
   let tokensOut = 0;
 
   try {
+    // Labelled so [DONE] can leave the read loop as well. Breaking only out of
+    // the chunk loop sent control back to reader.read(), where a server that
+    // keeps the connection open after [DONE] left the lane running forever.
+    readLoop:
     while (true) {
       const { done, value } = await reader.read();
       
@@ -97,7 +101,7 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
           const dataStr = chunk.substring(6);
           if (dataStr === '[DONE]') {
             // Stream finished per the OpenAI convention
-            break;
+            break readLoop;
           }
           
           try {

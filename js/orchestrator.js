@@ -4,6 +4,7 @@ import { call as callGemini } from './adapters/gemini.js';
 
 let activeRunControllers = [];
 let isRunning = false;
+let runGeneration = 0;   // bumped per run, so a stale run cannot speak for a live one
 
 // simple built-in boards
 const DEFAULT_BOARDS = {
@@ -102,6 +103,7 @@ export function cancelRun() {
   activeRunControllers.forEach(ctrl => ctrl.abort());
   activeRunControllers = [];
   isRunning = false;
+  runGeneration++;   // anything still in flight now belongs to a dead run
   return true;
 }
 
@@ -115,12 +117,13 @@ export async function runBoard(boardId, brief, onLaneUpdate, onStatusChange) {
     throw new Error("no active slots. configure settings first.");
   }
 
-  const board = BOARDS[boardId];
+  const board = getBoards()[boardId];
   if (!board) {
     throw new Error("unknown board.");
   }
 
   isRunning = true;
+  const myGeneration = ++runGeneration;
   activeRunControllers = [];
   onStatusChange('running');
 
@@ -168,14 +171,15 @@ export async function runBoard(boardId, brief, onLaneUpdate, onStatusChange) {
     // Wait for every lane to settle, successes and failures alike
     await Promise.allSettled(lanePromises);
 
-    if (!isRunning) {
-      // Aborted by the user
-      onStatusChange('cancelled');
+    if (myGeneration !== runGeneration) {
+      // Cancelled, and possibly superseded by a newer run. Report the
+      // cancellation but never touch state a live run now owns.
+      if (!isRunning) onStatusChange('cancelled');
       return null;
     }
 
     // COMPOSE STEP: fold the lane results into one markdown document
-    let markdown = `# API Agent Board Result\n\n**Board:** ${board.name}\n**Brief:**\n> ${brief.split('\\n').join('\\n> ')}\n\n---\n\n`;
+    let markdown = `# API Agent Board Result\n\n**Board:** ${board.name}\n**Brief:**\n> ${brief.split('\n').join('\n> ')}\n\n---\n\n`;
     
     finalResults.forEach((res, i) => {
       if (res) {
@@ -193,7 +197,11 @@ export async function runBoard(boardId, brief, onLaneUpdate, onStatusChange) {
     return markdown;
 
   } finally {
-    isRunning = false;
-    activeRunControllers = [];
+    // Only tear down if this run is still the current one; a newer run may have
+    // started after this one was cancelled.
+    if (myGeneration === runGeneration) {
+      isRunning = false;
+      activeRunControllers = [];
+    }
   }
 }
