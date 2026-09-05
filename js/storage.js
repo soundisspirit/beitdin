@@ -78,25 +78,7 @@ export function saveSlots(slots) {
   save('slots', slots);
 }
 
-export function clearKeys() {
-  const slots = getSlots();
-  const clearedSlots = slots.map(slot => ({
-    ...slot,
-    apiKey: '',
-    status: 'untested',
-    lastError: null
-  }));
-  saveSlots(clearedSlots);
-  return clearedSlots;
-}
 
-export function wipeAllData() {
-  Object.keys(localStorage).forEach(key => {
-    if (key.startsWith(PREFIX)) {
-      localStorage.removeItem(key);
-    }
-  });
-}
 
 function load(keySuffix, defaultValue) {
   try {

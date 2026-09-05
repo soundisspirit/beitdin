@@ -13,6 +13,21 @@ const esc = str => String(str ?? '').replace(/[&<>"']/g, c =>
 
 let currentSlots = getSlots();
 
+// Clearing has to go through currentSlots, not straight to storage: this module
+// keeps the live copy, and wiping only localStorage would leave the keys in
+// memory, still visible in the inputs, and ready to be written back by the next
+// updateSlot.
+export function clearApiKeys() {
+  currentSlots = currentSlots.map(slot => ({
+    ...slot,
+    apiKey: '',
+    status: 'untested',
+    lastError: null
+  }));
+  saveSlots(currentSlots);
+  renderSettings();
+}
+
 export function getActiveSlots() {
   // Return only enabled slots with a selected model
   return currentSlots.filter(s => s.enabled && s.selectedModel);

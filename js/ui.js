@@ -1,5 +1,5 @@
 import { getBoards, saveBoards, runBoard, cancelRun, addCustomBoard, deleteCustomBoard, isBuiltInBoard } from './orchestrator.js';
-import { getActiveSlots, renderSettings, getAllSlots, pingAllSlots } from './slots.js';
+import { getActiveSlots, renderSettings, getAllSlots, pingAllSlots, clearApiKeys } from './slots.js';
 import { laneMark } from './logos.js';
 
 let settingsMode = false;
@@ -174,6 +174,13 @@ export function initUI() {
     if (settingsMode) {
       e.target.textContent = 'close_settings';
       renderSettings();
+      const sBar = document.getElementById('settingsTopBar');
+      if (sBar) sBar.style.display = 'flex';
+      disarmClearKeys();
+      const pA0 = document.getElementById('promptArea');
+      const pF0 = document.getElementById('promptFooter');
+      if (pA0) pA0.style.visibility = 'hidden';
+      if (pF0) pF0.style.visibility = 'hidden';
       for (let i=0; i<3; i++) {
         const c = document.getElementById('content-'+i);
         const s = document.getElementById('settings-'+i);
@@ -182,6 +189,13 @@ export function initUI() {
       }
     } else {
       e.target.textContent = 'settings';
+      const sBar = document.getElementById('settingsTopBar');
+      if (sBar) sBar.style.display = 'none';
+      disarmClearKeys();
+      const pA0 = document.getElementById('promptArea');
+      const pF0 = document.getElementById('promptFooter');
+      if (pA0) pA0.style.visibility = 'visible';
+      if (pF0) pF0.style.visibility = 'visible';
       updateBoardUI(); // ensure names and logos are updated
       for (let i=0; i<3; i++) {
         const c = document.getElementById('content-'+i);
@@ -276,6 +290,24 @@ export function initUI() {
     setTimeout(() => { gs.textContent = 'Status: READY'; gs.style.color = ''; }, 2000);
   });
   document.getElementById('btnDownload').addEventListener('click', downloadMarkdown);
+
+  // Removing the keys cannot be undone, so it confirms in place the same way
+  // delete does: first click arms, second within 4s does it.
+  const btnKeys = document.getElementById('btnClearKeys');
+  let keysTimer = null;
+
+  btnKeys?.addEventListener('click', () => {
+    if (btnKeys.dataset.armed !== '1') {
+      btnKeys.dataset.armed = '1';
+      btnKeys.textContent = 'confirm? this cannot be undone';
+      keysTimer = setTimeout(disarmClearKeys, 4000);
+      return;
+    }
+    clearTimeout(keysTimer);
+    clearApiKeys();
+    disarmClearKeys();
+    flashStatus('api keys cleared from this browser', 'var(--red)', 4000);
+  });
 
   // ---- board actions: new / export / import / delete ----------------------
 
@@ -400,6 +432,13 @@ const esc = str => String(str).replace(/[&<>"']/g, c =>
 
 // The armed state lives on the button so anything that resets the label - a
 // board switch, a re-render - clears the state with it.
+function disarmClearKeys() {
+  const btn = document.getElementById('btnClearKeys');
+  if (!btn) return;
+  delete btn.dataset.armed;
+  btn.textContent = 'clear_keys';
+}
+
 function disarmDelete(btn) {
   if (!btn) return;
   delete btn.dataset.armed;
