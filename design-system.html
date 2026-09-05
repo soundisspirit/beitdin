@@ -132,7 +132,7 @@
     }
     @keyframes blink { 50% { opacity: 0.15; } }
 
-    /* ASCII Tamagotchi Logos */
+    /* ASCII lane marks */
     .logo {
       margin: 0 0 10px 0;
       color: var(--amber);
@@ -199,7 +199,7 @@
     <div style="display: flex; gap: 10px;">
       <div class="mock-lane">
         <div class="lane-head">
-          <div class="logo" data-provider="openai"></div>
+          <div class="logo" data-lane="1"></div>
           <div class="role">lead_architect</div>
           <div class="status">running...</div>
         </div>
@@ -210,7 +210,7 @@
       
       <div class="mock-lane">
         <div class="lane-head">
-          <div class="logo" data-provider="gemini"></div>
+          <div class="logo" data-lane="2"></div>
           <div class="role">security_expert</div>
           <div class="status">waiting</div>
         </div>
@@ -219,21 +219,13 @@
       
       <div class="mock-lane">
         <div class="lane-head">
-          <div class="logo" data-provider="custom"></div>
+          <div class="logo" data-lane="3"></div>
           <div class="role">devops_engineer</div>
           <div class="status">waiting</div>
         </div>
         <div class="lane-body"></div>
       </div>
-      
-      <div class="mock-lane">
-        <div class="lane-head">
-          <div class="logo" data-provider="mistral"></div>
-          <div class="role">data_engineer</div>
-          <div class="status">waiting</div>
-        </div>
-        <div class="lane-body"></div>
-      </div>
+
     </div>
 
   </div>
@@ -243,7 +235,7 @@
   import { LOGOS } from './js/logos.js';
 
   document.querySelectorAll('.logo').forEach(el => {
-    el.textContent = LOGOS[el.dataset.provider] || '';
+    el.textContent = LOGOS['lane' + el.dataset.lane];
   });
 </script>
 </body>

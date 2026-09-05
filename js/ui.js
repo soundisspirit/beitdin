@@ -1,7 +1,7 @@
 import { getBoards, saveBoards, runBoard, cancelRun, addCustomBoard, deleteCustomBoard, isBuiltInBoard } from './orchestrator.js';
 import { getActiveSlots, renderSettings, getAllSlots, pingAllSlots } from './slots.js';
 import { clearKeys } from './storage.js';
-import { LOGOS } from './logos.js';
+import { laneMark } from './logos.js';
 
 let settingsMode = false;
 let aboutMode = false;
@@ -344,17 +344,9 @@ export function updateBoardUI() {
         const logoEl = document.getElementById('logo-' + i);
         if (!logoEl || !allSlots[i]) continue;
 
-        // Only restamp the mark when the provider actually changed: this runs on
-        // every keystroke in the role fields, and a rewrite mid-blink would
-        // clobber the frame and restart the bob animation.
-        const service = allSlots[i].service || 'openai';
-        if (logoEl.dataset.provider !== service) {
-          logoEl.dataset.provider = service;
-          // A silent fallback here is how a half-added provider stays invisible:
-          // it renders as some other mark and looks like it works.
-          if (!LOGOS[service]) console.warn(`no tamagotchi mark for provider "${service}"`);
-          logoEl.textContent = LOGOS[service] || LOGOS.custom;
-        }
+        // The mark is fixed per lane, so it only ever needs writing once.
+        const mark = laneMark(i);
+        if (logoEl.textContent !== mark) logoEl.textContent = mark;
 
         const enabled = allSlots[i].enabled;
         logoEl.style.opacity = enabled ? '1' : '0.15';
