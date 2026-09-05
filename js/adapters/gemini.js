@@ -149,7 +149,7 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
 }
 
 /**
- * Model discovery funktio
+ * Model discovery
  */
 export async function getModels(baseUrl, apiKey) {
   if (!apiKey) throw new Error("Gemini requires an API key.");

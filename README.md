@@ -8,63 +8,72 @@
  ▀  ▀  ▀
 ```
 
-Three lanes. That mark is the source of every icon in this repo; see
-`docs/DESIGN-SYSTEM.md` and regenerate with `python3 tools/make-icons.py`.
+Three lanes. Run one brief against three models at once, each in its own role,
+and get back a single markdown document.
 
-A concurrent multi-agent execution environment built for testing, comparing, and pipelining output from multiple LLM perspectives.
+The app is a static page. It talks straight to the provider APIs from the
+browser, with no server, no build step and no dependencies.
 
-The application runs entirely client-side, fetching directly from provider APIs (OpenAI, Google Gemini, Custom/Local, Mistral). There is no backend database and no build step.
+## Quick start
 
-## Quick Start
+1. Serve the directory: `python3 -m http.server 8333 --bind 127.0.0.1`
+2. Open `http://127.0.0.1:8333` in a desktop browser.
+3. Open `settings`, pick a provider per lane, paste a key, press `ping` to load
+   the model list.
 
-1. Clone the repo
-2. Serve the directory: `python3 -m http.server 8333 --bind 127.0.0.1`
-3. Open `http://127.0.0.1:8333` in a desktop browser.
+It has to be served over `http://`. Opening `index.html` from the filesystem
+does not work, because browsers block ES modules on `file://`.
 
-Note: Due to the concurrent 3-lane execution layout, this application enforces a minimum viewport width of 1000px and is intentionally not designed for mobile devices.
-
-## Architecture
-
-This tool was pivoted from a heavier Python/Docker-based architecture into a highly lean, zero-dependency HTML/JS client app.
-
-- **Zero Build Step:** Native ES modules (`<script type="module">`). No Webpack, Vite, or TypeScript compilation required.
-- **Client-Side Orchestration:** The `orchestrator.js` module handles all concurrent LLM calls natively via `fetch`.
-- **Brutalist Terminal UI:** The UI uses native browser DOM APIs with a strict terminal aesthetic (`var(--mono)` typography, no rounded borders, brackets for buttons).
-- **Streaming Execution:** The UI streams model responses into the UI using `requestAnimationFrame` for a smooth, XSS-safe text rendering experience.
-
-For the rationale on why the cloud architecture was simplified into a local app, read `ARCHITECTURE-REVIEW.md`.
+Below 1000px wide the app replaces itself with a notice. Three live lanes side
+by side is the whole point, and that does not survive a phone.
 
 ## Features
 
-- **3-Lane Concurrency:** Run up to three agents simultaneously.
-- **Custom Boards:** Define distinct roles, personas, and tasks for each lane.
-- **Provider Agnostic:** Supports OpenAI, Google Gemini, Mistral, and any OpenAI-compatible local model (e.g. Ollama via `http://localhost:11434/v1`).
-- **Pipeline Accumulation:** Click `[ run ]` multiple times or shuffle roles to build a comprehensive document from multiple perspectives.
-- **Markdown Export:** Export the combined session output directly to a unified `.md` file.
+- **Three lanes, concurrently.** One brief, three models, three roles, at once.
+- **Boards.** A board names the three roles and their system prompts. Two ship
+  with the app; you can create, export, import and delete your own.
+- **Any provider.** OpenAI, Google Gemini, Mistral, and anything
+  OpenAI-compatible, including a local Ollama at `http://localhost:11434/v1`.
+- **Accumulating output.** Every run appends to the same markdown document, so
+  you can shuffle the roles, run again, and download the lot as one `.md`.
 
-## Design System
+## Keys and privacy
 
-The application strictly adheres to a brutally minimal, terminal-inspired design system. See `design-system.html` for the complete component catalog, spacing tokens, and color palette.
+API keys are held in `localStorage` in plain text, so anything that can run
+JavaScript on this origin can read them. That is the cost of having no server.
+Use keys you can revoke, and do not host this on a shared origin.
 
-## Project Structure
+The brief and the model responses are never persisted. They live in memory and
+are gone on reload.
+
+The page ships a CSP that blocks inline and third-party script. `connect-src` is
+deliberately wide (`https:` plus localhost ports) because a static page cannot
+rewrite its own policy to cover whatever custom endpoint you type in.
+
+Model output is written with `textContent`, never `innerHTML`.
+
+## Layout
 
 ```text
 .
-├── index.html           # Main application entry point
-├── design-system.html   # Component catalog and design tokens
-├── js/                  # Vanilla ES modules
-│   ├── main.js          # Bootstrapper
-│   ├── ui.js            # DOM manipulation, layout shifts, streaming
-│   ├── orchestrator.js  # Concurrent LLM execution, board definitions
-│   ├── slots.js         # Provider configuration handling
-│   └── adapters/        # LLM specific API handlers (OpenAI, Gemini)
-├── tools/make-icons.py  # Regenerates every icon from the ASCII mark
-├── icon.png             # Master icon (512x512)
-└── docs/                # Architecture records and decision logs
+├── index.html           # markup, all of the CSS, one module script tag
+├── design-system.html   # component catalogue, served the same way
+├── manifest.json
+├── js/
+│   ├── main.js          # entry point
+│   ├── ui.js            # DOM wiring, streaming render, board actions
+│   ├── orchestrator.js  # runs the three lanes, builds the markdown
+│   ├── slots.js         # per-lane provider configuration
+│   ├── storage.js       # localStorage wrapper and defaults
+│   ├── logos.js         # the three lane marks
+│   └── adapters/        # openai-compat.js, gemini.js
+├── tools/make-icons.py  # regenerates every icon from the mark above
+└── docs/                # design system, concept notes
 ```
 
-## Contributing
+## Conventions
 
-- Keep all logic in modular, native ES components.
-- Do not introduce a build step or NPM dependencies (other than for testing).
-- Adhere strictly to the terminal brutalism design language (no native modals, `<dialog>` tags, or rounded corners).
+- Native ES modules. No build step, no bundler, no npm dependencies.
+- Terminal brutalism: monospace throughout, one font size, square corners,
+  buttons drawn as `[name]`.
+- Model output goes through `textContent`.

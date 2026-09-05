@@ -101,7 +101,7 @@ export async function runBoard(boardId, brief, onLaneUpdate, onStatusChange) {
   const finalResults = new Array(3).fill(null);
 
   try {
-    // Luodaan abort controllerit jokaiselle lanelle
+    // One abort controller per lane
     const lanePromises = slots.map(async (slot) => {
       const index = slot.slotIndex; // Use actual UI lane index
       const controller = new AbortController();
@@ -142,7 +142,7 @@ export async function runBoard(boardId, brief, onLaneUpdate, onStatusChange) {
     await Promise.allSettled(lanePromises);
 
     if (!isRunning) {
-      // Keskeytetty
+      // Aborted by the user
       onStatusChange('cancelled');
       return null;
     }

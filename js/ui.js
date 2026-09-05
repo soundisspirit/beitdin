@@ -1,6 +1,5 @@
 import { getBoards, saveBoards, runBoard, cancelRun, addCustomBoard, deleteCustomBoard, isBuiltInBoard } from './orchestrator.js';
 import { getActiveSlots, renderSettings, getAllSlots, pingAllSlots } from './slots.js';
-import { clearKeys } from './storage.js';
 import { laneMark } from './logos.js';
 
 let settingsMode = false;

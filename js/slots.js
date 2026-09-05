@@ -22,7 +22,7 @@ export function updateSlot(index, updates, shouldRender = true) {
 }
 
 /**
- * Testaa yhteyden ja hakee mallit
+ * Test the connection and fetch the model list
  */
 export async function testSlot(index) {
   const slot = currentSlots[index];
@@ -71,7 +71,7 @@ export async function testSlot(index) {
 }
 
 /**
- * Testaa kaikki aktiiviset slotit rinnakkain (global ping)
+ * Test every active slot in parallel (global ping)
  */
 export async function pingAllSlots() {
   const enabledSlots = currentSlots.filter(s => s.enabled);

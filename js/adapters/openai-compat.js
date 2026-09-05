@@ -1,6 +1,6 @@
 /**
- * OpenAI-yhteensopiva adapteri
- * Kattaa: OpenAI, Mistral, Groq, Together, OpenRouter, lokaalit (Ollama, LM Studio)
+ * OpenAI-compatible adapter
+ * Covers: OpenAI, Mistral, Groq, Together, OpenRouter, and local servers (Ollama, LM Studio)
  */
 
 export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, signal) {
@@ -108,7 +108,7 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
               yield { type: 'delta', text: content };
             }
             
-            // Joillain providereilla on usage-tieto striimin lopussa
+            // Some providers put usage data at the end of the stream
             if (parsed.usage) {
               tokensIn = parsed.usage.prompt_tokens || 0;
               tokensOut = parsed.usage.completion_tokens || 0;
@@ -121,7 +121,7 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
       }
     }
     
-    // Viimeinen decode ilman stream-lippua
+    // Final decode without the stream flag
     buffer += decoder.decode();
     // Any trailing partial line left in the buffer is intentionally ignored
     
@@ -148,7 +148,7 @@ export async function* call(slotConfig, systemPrompt, userPrompt, jsonSchema, si
 }
 
 /**
- * Model discovery funktio
+ * Model discovery
  */
 export async function getModels(baseUrl, apiKey) {
   const endpoint = baseUrl.replace(/\/chat\/completions$/, '').replace(/\/$/, '') + '/models';

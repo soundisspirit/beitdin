@@ -1,7 +1,2 @@
+.DS_Store
 .env
-out/
-__pycache__/
-*.pyc
-.venv/
-context/*
-!context/README.md
