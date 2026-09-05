@@ -381,6 +381,10 @@ export function initUI() {
     }
   });
 
+  // The markup carries a year as a fallback; keep it current on every load.
+  const year = document.getElementById('creditYear');
+  if (year) year.textContent = new Date().getFullYear();
+
   updateBoardUI();
 }
 
