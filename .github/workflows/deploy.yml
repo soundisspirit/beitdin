@@ -1,0 +1,59 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-beitdin
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Load the deploy key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Check it parses before shipping it
+        run: |
+          test -f index.html || { echo "index.html missing"; exit 1; }
+          test -f js/main.js || { echo "js/main.js missing"; exit 1; }
+          for f in js/*.js js/adapters/*.js; do
+            if node --input-type=module -e "await import('./$f')" 2>&1 | grep -q SyntaxError; then
+              echo "syntax error in $f"; exit 1
+            fi
+          done
+          python3 -c "import json; json.load(open('manifest.json'))"
+          echo "app looks shippable"
+
+      - name: Ship it
+        run: |
+          # --delete keeps the server mirroring the repo. deploy/, tools/ and
+          # docs/ are working files, not the site.
+          rsync -az --delete \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude '.gitignore' \
+            --exclude '.env' \
+            --exclude '.DS_Store' \
+            --exclude 'Linkedin/' \
+            --exclude 'tools/' \
+            --exclude 'deploy/' \
+            --exclude 'docs/' \
+            -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes" \
+            ./ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/var/www/beitdin.dev/"
+
+      - name: Hand it to the web server
+        run: |
+          ssh -i ~/.ssh/id_ed25519 "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "chown -R www-data:www-data /var/www/beitdin.dev && \
+             find /var/www/beitdin.dev -type d -exec chmod 755 {} + && \
+             find /var/www/beitdin.dev -type f -exec chmod 644 {} +"
