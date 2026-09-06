@@ -413,6 +413,7 @@
     <h1 id="homeLogo" style="cursor: pointer;">beitdin.dev</h1>
     
     <div class="controls">
+      <button id="btnMain" style="color: var(--amber);">close_main</button>
       <button id="btnAbout">about</button>
       <button id="btnSettings">settings</button>
       <button id="btnPingAll">ping_all_lanes</button>
@@ -477,7 +478,11 @@
           <div class="role-title" id="role-0">role_1</div>
           <div class="lane-status" id="status-0">waiting</div>
         </div>
-        <div class="term" id="content-0"></div>
+        <div class="lane-main" id="main-0" style="padding: 16px; overflow-y: auto; flex: 1; color: var(--ink);">
+          <p style="color: var(--amber);">> supercharge_your_planning</p>
+          <p>if you want to supercharge your planning phase using ai, you are in the right place. this is a massive advantage for speeding up development and turning every stone on your idea before you commit to a task.<br><br>beitdin lets you run multiple llms together, bringing multiple different perspectives from different providers and models toward one single goal.</p>
+        </div>
+        <div class="term" id="content-0" style="display: none;"></div>
         <div class="lane-settings" id="settings-0" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"></div>
         <div class="lane-roles" id="roles-0" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"><div style="margin-bottom: 16px;"><label style="display:block; color:var(--amber); margin-bottom:4px;">> lane_1_title:</label><input type="text" id="role-title-0" style="width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 4px 0; outline: none;"></div><div style="margin-bottom: 16px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><label style="color:var(--amber);">> system_prompt:</label><span id="role-focus-count-0" style="color:var(--frame-hi);">0 / 4000</span></div><textarea id="role-focus-0" maxlength="4000" style="width: 100%; background: transparent; border: 1px dashed var(--frame); color: var(--amber); font: inherit; padding: 8px; outline: none; min-height: 200px; resize: vertical;"></textarea></div></div>
         <div class="lane-about" id="about-0" style="display: none; padding: 16px; overflow-y: auto; flex: 1; color: var(--ink);">
@@ -496,7 +501,11 @@
           <div class="role-title" id="role-1">role_2</div>
           <div class="lane-status" id="status-1">waiting</div>
         </div>
-        <div class="term" id="content-1"></div>
+        <div class="lane-main" id="main-1" style="padding: 16px; overflow-y: auto; flex: 1; color: var(--ink);">
+          <p style="color: var(--amber);">> turn_every_stone</p>
+          <p>configure three apis and assign each one a distinct system prompt (a role). feed them a single brief, let it run, and watch it generate three parallel outputs.<br><br>want more? shuffle the roles and generate three, six, or nine different expert opinions. if you are like me and want to thoroughly interrogate your plans before acting, this is the ultimate tool in your toolbox.</p>
+        </div>
+        <div class="term" id="content-1" style="display: none;"></div>
         <div class="lane-settings" id="settings-1" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"></div>
         <div class="lane-roles" id="roles-1" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"><div style="margin-bottom: 16px;"><label style="display:block; color:var(--amber); margin-bottom:4px;">> lane_2_title:</label><input type="text" id="role-title-1" style="width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 4px 0; outline: none;"></div><div style="margin-bottom: 16px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><label style="color:var(--amber);">> system_prompt:</label><span id="role-focus-count-1" style="color:var(--frame-hi);">0 / 4000</span></div><textarea id="role-focus-1" maxlength="4000" style="width: 100%; background: transparent; border: 1px dashed var(--frame); color: var(--amber); font: inherit; padding: 8px; outline: none; min-height: 200px; resize: vertical;"></textarea></div></div>
         <div class="lane-about" id="about-1" style="display: none; padding: 16px; overflow-y: auto; flex: 1; color: var(--ink);">
@@ -515,7 +524,11 @@
           <div class="role-title" id="role-2">role_3</div>
           <div class="lane-status" id="status-2">waiting</div>
         </div>
-        <div class="term" id="content-2"></div>
+        <div class="lane-main" id="main-2" style="padding: 16px; overflow-y: auto; flex: 1; color: var(--ink);">
+          <p style="color: var(--amber);">> check_it_out</p>
+          <p>i use this type of setup extensively alongside researcher agents. it forces you to look at your task from angles you would never have considered alone.<br><br>a full tutorial video explaining how this works is available on youtube. check it out, configure your lanes, and start stress-testing your ideas.</p>
+        </div>
+        <div class="term" id="content-2" style="display: none;"></div>
         <div class="lane-settings" id="settings-2" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"></div>
         <div class="lane-roles" id="roles-2" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"><div style="margin-bottom: 16px;"><label style="display:block; color:var(--amber); margin-bottom:4px;">> lane_3_title:</label><input type="text" id="role-title-2" style="width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 4px 0; outline: none;"></div><div style="margin-bottom: 16px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><label style="color:var(--amber);">> system_prompt:</label><span id="role-focus-count-2" style="color:var(--frame-hi);">0 / 4000</span></div><textarea id="role-focus-2" maxlength="4000" style="width: 100%; background: transparent; border: 1px dashed var(--frame); color: var(--amber); font: inherit; padding: 8px; outline: none; min-height: 200px; resize: vertical;"></textarea></div></div>
         <div class="lane-about" id="about-2" style="display: none; padding: 16px; overflow-y: auto; flex: 1; color: var(--ink);">

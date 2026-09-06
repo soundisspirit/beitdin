@@ -5,6 +5,7 @@ import { laneMark } from './logos.js';
 let settingsMode = false;
 let aboutMode = false;
 let rolesMode = false;
+let mainMode = true;
 
 
 let latestMarkdown = null;
@@ -100,6 +101,7 @@ export function initUI() {
   document.getElementById('btnRoles')?.addEventListener('click', (e) => {
     if (settingsMode) { document.getElementById('btnSettings').click(); }
     if (aboutMode) { document.getElementById('btnAbout').click(); }
+    if (mainMode) { document.getElementById('btnMain').click(); }
     rolesMode = !rolesMode;
     if (rolesMode) {
       e.target.textContent = 'close_roles';
@@ -140,17 +142,42 @@ export function initUI() {
     if (settingsMode) document.getElementById('btnSettings').click();
     if (aboutMode) document.getElementById('btnAbout').click();
     if (rolesMode) document.getElementById('btnRoles').click();
+    if (!mainMode) document.getElementById('btnMain').click();
     
     // Only the panels are closed here; the prompt text is deliberately kept.
-    
     const gs = document.getElementById('globalStatus');
     gs.textContent = "Status: READY";
     gs.style.color = '';
   });
 
+  document.getElementById('btnMain')?.addEventListener('click', (e) => {
+    if (settingsMode) { document.getElementById('btnSettings').click(); }
+    if (rolesMode) { document.getElementById('btnRoles').click(); }
+    if (aboutMode) { document.getElementById('btnAbout').click(); }
+    mainMode = !mainMode;
+    if (mainMode) {
+      e.target.textContent = 'close_main';
+      for (let i = 0; i < 3; i++) {
+        const c = document.getElementById('content-'+i);
+        const m = document.getElementById('main-'+i);
+        if (c) c.style.display = 'none';
+        if (m) m.style.display = 'block';
+      }
+    } else {
+      e.target.textContent = 'main';
+      for (let i = 0; i < 3; i++) {
+        const c = document.getElementById('content-'+i);
+        const m = document.getElementById('main-'+i);
+        if (c) c.style.display = 'block';
+        if (m) m.style.display = 'none';
+      }
+    }
+  });
+
   document.getElementById('btnAbout')?.addEventListener('click', (e) => {
     if (settingsMode) { document.getElementById('btnSettings').click(); }
     if (rolesMode) { document.getElementById('btnRoles').click(); }
+    if (mainMode) { document.getElementById('btnMain').click(); }
     aboutMode = !aboutMode;
     if (aboutMode) {
       e.target.textContent = 'close_about';
@@ -174,6 +201,7 @@ export function initUI() {
   document.getElementById('btnSettings').addEventListener('click', (e) => {
     if (aboutMode) { document.getElementById('btnAbout').click(); }
     if (rolesMode) { document.getElementById('btnRoles').click(); }
+    if (mainMode) { document.getElementById('btnMain').click(); }
     settingsMode = !settingsMode;
     if (settingsMode) {
       e.target.textContent = 'close_settings';
@@ -581,6 +609,11 @@ async function startRun() {
     setTimeout(() => { gs.textContent = 'Status: READY'; gs.style.color = ''; }, 3000);
     return;
   }
+
+  if (mainMode) document.getElementById('btnMain').click();
+  if (aboutMode) document.getElementById('btnAbout').click();
+  if (settingsMode) document.getElementById('btnSettings').click();
+  if (rolesMode) document.getElementById('btnRoles').click();
 
   // Reset UI
   laneStatusHeld = false;
