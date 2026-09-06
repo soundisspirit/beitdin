@@ -1,2 +1,7 @@
 .DS_Store
 .env
+
+# Media: screen recordings and promo exports. Kept on disk, never in git -
+# they are hundreds of MB and two exceed GitHub's 100MB per-file limit.
+*.mov
+Linkedin/
