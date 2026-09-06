@@ -55,12 +55,16 @@ by side is the whole point, and that does not survive a phone.
 
 ## Keys and privacy
 
-API keys are held in `localStorage` in plain text, so anything that can run
-JavaScript on this origin can read them. That is the cost of having no server.
-Use keys you can revoke, and do not host this on a shared origin.
+API keys live in `sessionStorage`, which the browser drops when the tab closes.
+They are never written to disk. While the tab is open they are in plain text, so
+anything that can run JavaScript on this origin could read them during that
+window. That is the cost of having no server. Use keys you can revoke.
 
-The brief and the model responses are never persisted. They live in memory and
-are gone on reload.
+What does persist is the lane configuration and your boards: endpoints, model
+names, role titles and system prompts. No secrets.
+
+The brief and the model responses are never persisted either. They live in
+memory and are gone on reload.
 
 Nothing in the page tracks you: no analytics, no telemetry, no cookies, no third
 party scripts. There is no consent banner because there is nothing to consent
