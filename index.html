@@ -118,6 +118,10 @@
          1fr column used to push the char counter into the middle. */
       grid-template-columns: 1fr auto;
       align-items: center;
+      /* Settings and roles modes put a third visible child in a two column
+         grid, which wrapped to a second row and pushed everything above the
+         bar's centre line. Pin them all to row one. */
+      grid-auto-flow: column;
       gap: 16px;
       padding: 0 14px;
       border-bottom: 1px solid var(--frame);
@@ -429,7 +433,7 @@
       
 
     <div id="settingsTopBar" style="display: none; align-items: center; gap: 16px;">
-      <span style="color: var(--frame-hi);">keys are stored in this browser in plain text.</span>
+      <span style="color: var(--frame-hi);">keys are held for this tab only and never written to disk.</span>
       <button id="btnClearKeys" style="background: transparent; border: none; color: var(--red); cursor: pointer; font: inherit;">clear_keys</button>
     </div>
 
