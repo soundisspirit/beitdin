@@ -91,6 +91,7 @@ Model output is written with `textContent`, never `innerHTML`.
 │   ├── slots.js         # per-lane provider configuration
 │   ├── storage.js       # localStorage wrapper and defaults
 │   ├── logos.js         # the three lane marks
+│   ├── logohistory.js   # backup of logos for future updates (gitignored)
 │   └── adapters/        # openai-compat.js, gemini.js
 ├── tools/make-icons.py  # regenerates every icon from the mark above
 └── docs/                # design system, concept notes

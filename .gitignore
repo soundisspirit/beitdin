@@ -5,3 +5,4 @@
 # they are hundreds of MB and two exceed GitHub's 100MB per-file limit.
 *.mov
 Linkedin/
+js/logohistory.js
