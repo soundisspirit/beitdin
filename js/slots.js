@@ -159,7 +159,7 @@ export function renderSettings() {
       <div style="margin-bottom: 16px;">
         <label style="display:block; color:var(--amber); margin-bottom:4px;">> api_key:</label>
         <div style="display: flex; gap: 8px;">
-          <input type="password" id="key-${i}" value="${esc(slot.apiKey)}" placeholder="empty for local models" autocomplete="off" ${!slot.enabled ? 'disabled' : ''} style="flex: 1; min-width: 0; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 4px 0; outline: none; ${!slot.enabled ? 'opacity: 0.3;' : ''}">
+          <input type="password" id="key-${i}" value="${esc(slot.apiKey)}" placeholder="empty for local models" autocomplete="off" data-1p-ignore="true" data-lpignore="true" ${!slot.enabled ? 'disabled' : ''} style="flex: 1; min-width: 0; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 4px 0; outline: none; ${!slot.enabled ? 'opacity: 0.3;' : ''}">
           <button type="button" id="test-${i}" ${!slot.enabled || slot.status === 'testing' ? 'disabled' : ''} style="${!slot.enabled ? 'opacity: 0.3;' : ''}">${slot.status === 'testing' ? 'testing...' : 'ping'}</button>
         </div>
         ${slot.enabled && slot.status === 'error' ? `<div style="color: var(--red); margin-top: 6px;">[error: ${esc(slot.lastError)}]</div>` : ''}
