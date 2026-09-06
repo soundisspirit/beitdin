@@ -138,7 +138,7 @@ export function renderSettings() {
       </div>
       
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-        <label style="color:var(--amber-dim);">> provider:</label>
+        <label style="color:var(--amber);">> provider:</label>
         <div class="term-select" id="service-select-${i}" style="margin-bottom: 0; flex: 1;">
           <div class="term-select-current">${!slot.enabled ? '[disable_lane]' : slot.service === 'gemini' ? 'google_gemini' : slot.service === 'custom' ? 'custom / local' : slot.service === 'mistral' ? 'mistral' : 'openai'}</div>
           <div class="term-options">
@@ -152,12 +152,12 @@ export function renderSettings() {
       </div>
       
       <div style="margin-bottom: 16px;">
-        <label style="display:block; color:var(--amber-dim); margin-bottom:4px;">> endpoint_url:</label>
+        <label style="display:block; color:var(--amber); margin-bottom:4px;">> endpoint_url:</label>
         <input type="url" id="url-${i}" value="${esc(slot.baseUrl)}" ${!slot.enabled ? 'disabled' : ''} style="width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 4px 0; outline: none; ${!slot.enabled ? 'opacity: 0.3;' : ''}">
       </div>
       
       <div style="margin-bottom: 16px;">
-        <label style="display:block; color:var(--amber-dim); margin-bottom:4px;">> api_key:</label>
+        <label style="display:block; color:var(--amber); margin-bottom:4px;">> api_key:</label>
         <div style="display: flex; gap: 8px;">
           <input type="password" id="key-${i}" value="${esc(slot.apiKey)}" placeholder="empty for local models" autocomplete="off" ${!slot.enabled ? 'disabled' : ''} style="flex: 1; min-width: 0; background: transparent; border: 0; border-bottom: 1px solid var(--frame); color: var(--amber); font: inherit; padding: 4px 0; outline: none; ${!slot.enabled ? 'opacity: 0.3;' : ''}">
           <button type="button" id="test-${i}" ${!slot.enabled || slot.status === 'testing' ? 'disabled' : ''} style="${!slot.enabled ? 'opacity: 0.3;' : ''}">${slot.status === 'testing' ? 'testing...' : 'ping'}</button>
@@ -168,7 +168,7 @@ export function renderSettings() {
       
       ${!slot.enabled ? '' : slot.status === 'ok' && slot.availableModels.length > 0 ? `
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-        <label style="color:var(--amber-dim);">> model:</label>
+        <label style="color:var(--amber);">> model:</label>
         <div class="term-select" id="model-select-${i}" style="margin-bottom: 0; flex: 1;">
           <div class="term-select-current">${esc(slot.selectedModel) || 'select model...'}</div>
           <div class="term-options">
