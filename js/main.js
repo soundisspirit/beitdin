@@ -3,7 +3,7 @@ import { initUI, updateBoardUI } from './ui.js';
 function boot() {
   initUI();
   updateBoardUI();
-  console.log("API Agent Board initialized.");
+  console.log("beitdin initialized.");
 }
 
 if (document.readyState === 'loading') {

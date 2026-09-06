@@ -179,7 +179,7 @@ export async function runBoard(boardId, brief, onLaneUpdate, onStatusChange) {
     }
 
     // COMPOSE STEP: fold the lane results into one markdown document
-    let markdown = `# API Agent Board Result\n\n**Board:** ${board.name}\n**Brief:**\n> ${brief.split('\n').join('\n> ')}\n\n---\n\n`;
+    let markdown = `# beitdin result\n\n**Board:** ${board.name}\n**Brief:**\n> ${brief.split('\n').join('\n> ')}\n\n---\n\n`;
     
     finalResults.forEach((res, i) => {
       if (res) {

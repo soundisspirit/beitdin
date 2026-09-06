@@ -1,6 +1,6 @@
 {
-  "name": "api_agent_board",
-  "short_name": "AAB",
+  "name": "beitdin",
+  "short_name": "beitdin",
   "description": "Concurrent multi-agent execution environment",
   "start_url": "/",
   "display": "standalone",

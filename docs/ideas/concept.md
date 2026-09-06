@@ -1,4 +1,4 @@
-# API Agent Board - concept summary
+# beitdin - concept summary
 
 ## Problem statement
 How could we remove the manual copy-paste work from power users who want to iterate on ideas or code with three different AI models at once, and package the results straight into a single file that can be worked on further?

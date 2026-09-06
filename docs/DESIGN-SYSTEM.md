@@ -1,4 +1,4 @@
-# API Agent Board - Design System
+# beitdin - Design System
 
 This document defines the UI/UX rules for the application. The design leans hard into a brutalist, retro terminal/hacker aesthetic. The goal is a tool that looks as if it were running on a command line, while still using the browser's layout capabilities.
 
