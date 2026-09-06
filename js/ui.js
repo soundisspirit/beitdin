@@ -66,7 +66,11 @@ export function initUI() {
       titleEl.addEventListener('input', updateRole);
     }
     if (focusEl) {
-      focusEl.addEventListener('input', updateRole);
+      focusEl.addEventListener('input', () => {
+        updateRole();
+        const countEl = document.getElementById('role-focus-count-' + i);
+        if (countEl) countEl.textContent = `${focusEl.value.length} / 4000`;
+      });
     }
   }
 
@@ -528,8 +532,12 @@ export function updateBoardUI() {
         }
         
         const focusInput = document.getElementById('role-focus-' + i);
-        if (focusInput && document.activeElement !== focusInput) {
-          focusInput.value = role.focus;
+        if (focusInput) {
+          if (document.activeElement !== focusInput) {
+            focusInput.value = role.focus;
+          }
+          const countEl = document.getElementById('role-focus-count-' + i);
+          if (countEl) countEl.textContent = `${focusInput.value.length} / 4000`;
         }
       });
       
