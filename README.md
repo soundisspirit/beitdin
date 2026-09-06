@@ -8,22 +8,15 @@
  ▀  ▀  ▀
 ```
 
-Three specialists read your brief at the same time and hand you one document
-with all three outputs.
+If you want to supercharge your planning phase using AI, this is the tool.
 
-A *beit din* is a court, and it sits with three judges: one matter, three people
-who know different things, one ruling. That is the shape of this tool, so it
-borrowed the name.
+Beitdin lets you run multiple LLMs together, bringing multiple different perspectives from different providers and models toward one single goal. Configure three APIs, assign each one a distinct system prompt (a role), feed them a single brief, and watch it generate three parallel outputs. 
 
-Each lane holds a model *and a role*: a title and a system prompt. The same
-brief arrives at lane one as a technical architect and at lane two as a security
-expert, so the three answers are meant to complement each other, not compete.
-They compose into a single markdown file.
+Want more? Shuffle the roles and generate three, six, or nine different expert opinions. If you want to thoroughly interrogate your plans and turn every stone before committing to a task, this is the ultimate tool in your toolbox.
 
-**This is not a model comparison tool**, though you can use it that way if you
-want. It is not asking which model wrote the better answer to the same question.
-The lanes are asking different questions of the same brief, and the output is a
-document rather than a scoreboard.
+A *beit din* is a court, and it sits with three judges: one matter, three people who know different things, one ruling. That is the shape of this tool, so it borrowed the name.
+
+**This is not a model comparison tool**, though you can use it that way if you want. It is not asking which model wrote the better answer to the same question. The lanes ask different questions of the same brief. They compose into a single markdown file that you can hand onward.
 
 The app is a static page. It talks straight to the provider APIs from the
 browser, with no server, no build step and no dependencies.
@@ -53,29 +46,19 @@ by side is the whole point, and that does not survive a phone.
 - **Accumulating output.** Every run appends to the same markdown document, so
   you can shuffle the roles, run again, and download the lot as one `.md`.
 
-## Keys and privacy
+## Security & Privacy
 
-API keys live in `sessionStorage`, which the browser drops when the tab closes.
-They are never written to disk. While the tab is open they are in plain text, so
-anything that can run JavaScript on this origin could read them during that
-window. That is the cost of having no server. Use keys you can revoke.
+**Highly secure by design:**
+- **No backend:** The app is a fully static HTML/JS page. Your brief, data, and API keys go directly from your browser to your chosen AI provider. Data never routes through Beitdin's servers.
+- **Keys are not saved to disk:** API keys are stored only in the browser's `sessionStorage`. They disappear completely as soon as you close the tab. They are never written to your hard drive or sent anywhere else.
+- **Zero tracking:** The app has no analytics, cookies, third-party scripts, or telemetry. No one is monitoring what you write.
+- **No XSS risk:** AI-generated responses are injected using the `textContent` method instead of `innerHTML`, meaning the AI cannot accidentally inject executable code into the page.
+- **Strict CSP:** The page enforces a strict Content Security Policy (`script-src 'self'`), blocking any external scripts from loading. `connect-src` is deliberately wide (`https:` plus localhost ports) because a static page cannot rewrite its own policy to cover whatever custom endpoint you type in.
 
-What does persist is the lane configuration and your boards: endpoints, model
-names, role titles and system prompts. No secrets.
-
-The brief and the model responses are never persisted either. They live in
-memory and are gone on reload.
-
-Nothing in the page tracks you: no analytics, no telemetry, no cookies, no third
-party scripts. There is no consent banner because there is nothing to consent
-to. Whatever server hosts the page will write an ordinary access log, as every
-web server does, and that is the only record a visit leaves.
-
-The page ships a CSP that blocks inline and third-party script. `connect-src` is
-deliberately wide (`https:` plus localhost ports) because a static page cannot
-rewrite its own policy to cover whatever custom endpoint you type in.
-
-Model output is written with `textContent`, never `innerHTML`.
+**User Responsibility:**
+- **Keys in memory:** As long as the tab is open, your API keys live in the browser's memory in plain text. A malicious browser extension reading page data could theoretically capture them.
+- **Endpoint responsibility:** Since you configure the target URL, you are responsible for knowing where your keys are sent.
+- **Disclaimer:** This tool is provided "as is", without warranty of any kind. The author takes no responsibility for any misuse, data leaks, API costs, or any other consequences resulting from the use of this software. Use at your own risk.
 
 ## Layout
 
