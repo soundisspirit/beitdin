@@ -8,11 +8,12 @@
  ▀  ▀  ▀
 ```
 
-Three specialists read your brief at the same time and hand you one document.
+Three specialists read your brief at the same time and hand you one document
+with all three outputs.
 
-A *beit din* is a rabbinical court, and it sits with exactly three judges: one
-matter, three people who know different things, one ruling. That is the shape of
-this tool, so it borrowed the name.
+A *beit din* is a court, and it sits with three judges: one matter, three people
+who know different things, one ruling. That is the shape of this tool, so it
+borrowed the name.
 
 Each lane holds a model *and a role*: a title and a system prompt. The same
 brief arrives at lane one as a technical architect and at lane two as a security
