@@ -20,9 +20,10 @@ brief arrives at lane one as a technical architect and at lane two as a security
 expert, so the three answers are meant to complement each other, not compete.
 They compose into a single markdown file.
 
-**This is not a model comparison tool.** It is not asking which model wrote the
-better answer to the same question. The lanes are asking different questions of
-the same brief, and the output is a document rather than a scoreboard.
+**This is not a model comparison tool**, though you can use it that way if you
+want. It is not asking which model wrote the better answer to the same question.
+The lanes are asking different questions of the same brief, and the output is a
+document rather than a scoreboard.
 
 The app is a static page. It talks straight to the provider APIs from the
 browser, with no server, no build step and no dependencies.
