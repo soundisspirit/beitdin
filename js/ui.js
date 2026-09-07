@@ -129,10 +129,17 @@ export function initUI() {
       if (pF) pF.style.visibility = 'visible';
       
       for (let i = 0; i < 3; i++) {
-        const c = document.getElementById('content-'+i);
         const r = document.getElementById('roles-'+i);
-        if (c) c.style.display = 'block';
         if (r) r.style.display = 'none';
+      }
+      
+      if (!laneStatusHeld) {
+        document.getElementById('btnMain').click();
+      } else {
+        for (let i = 0; i < 3; i++) {
+          const c = document.getElementById('content-'+i);
+          if (c) c.style.display = 'block';
+        }
       }
     }
   });
@@ -190,10 +197,17 @@ export function initUI() {
     } else {
       e.target.textContent = 'about';
       for (let i = 0; i < 3; i++) {
-        const c = document.getElementById('content-'+i);
         const a = document.getElementById('about-'+i);
-        if (c) c.style.display = 'block';
         if (a) a.style.display = 'none';
+      }
+      
+      if (!laneStatusHeld) {
+        document.getElementById('btnMain').click();
+      } else {
+        for (let i = 0; i < 3; i++) {
+          const c = document.getElementById('content-'+i);
+          if (c) c.style.display = 'block';
+        }
       }
     }
   });
@@ -230,10 +244,17 @@ export function initUI() {
       if (pF0) pF0.style.visibility = 'visible';
       updateBoardUI(); // ensure names and logos are updated
       for (let i=0; i<3; i++) {
-        const c = document.getElementById('content-'+i);
         const s = document.getElementById('settings-'+i);
-        if(c) c.style.display = 'block';
         if(s) s.style.display = 'none';
+      }
+      
+      if (!laneStatusHeld) {
+        document.getElementById('btnMain').click();
+      } else {
+        for (let i=0; i<3; i++) {
+          const c = document.getElementById('content-'+i);
+          if(c) c.style.display = 'block';
+        }
       }
     }
   });
