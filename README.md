@@ -14,8 +14,6 @@ Beitdin lets you run multiple LLMs together, bringing multiple different perspec
 
 Want more? Shuffle the roles and generate three, six, or nine different expert opinions. If you want to thoroughly interrogate your plans and turn every stone before committing to a task, this is the ultimate tool in your toolbox.
 
-A *beit din* is a court, and it sits with three judges: one matter, three people who know different things, one ruling. That is the shape of this tool, so it borrowed the name.
-
 **This is not a model comparison tool**, though you can use it that way if you want. It is not asking which model wrote the better answer to the same question. The lanes ask different questions of the same brief. They compose into a single markdown file that you can hand onward.
 
 The app is a static page. It talks straight to the provider APIs from the
