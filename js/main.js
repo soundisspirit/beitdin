@@ -1,8 +1,10 @@
 import { initUI, updateBoardUI } from './ui.js';
+import { initTutorial } from './tutorial.js';
 
 function boot() {
   initUI();
   updateBoardUI();
+  initTutorial();
   console.log("beitdin initialized.");
 }
 

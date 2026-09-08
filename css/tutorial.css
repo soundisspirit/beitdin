@@ -1,0 +1,264 @@
+/* beitdin - Interactive Tutorial Styles */
+
+:root {
+  --z-app: 1;
+  --z-tutorial-backdrop: 40;
+  --z-tutorial-target: 41;
+  --z-tutorial-hud: 42;
+}
+
+/* Semi-transparent backdrop to guide focus without blocking clicks */
+.tutorial-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  z-index: var(--z-tutorial-backdrop);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.tutorial-backdrop.active {
+  opacity: 1;
+}
+
+/* Highlight for target UI element */
+.tutorial-highlight {
+  position: relative !important;
+  z-index: var(--z-tutorial-target) !important;
+  outline: 2px dashed var(--cyan, #00e5ff) !important;
+  outline-offset: 3px !important;
+  animation: tutorial-pulse 1.2s steps(2, end) infinite;
+  opacity: 1 !important;
+}
+
+#btnDownload.tutorial-highlight,
+.tutorial-highlight#btnDownload {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+@keyframes tutorial-pulse {
+  0%, 100% { outline-color: var(--cyan, #00e5ff); }
+  50% { outline-color: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tutorial-highlight {
+    animation: none;
+    outline-style: solid !important;
+  }
+}
+
+/* Floating Terminal Brutalist HUD */
+#tutorialHud {
+  position: fixed;
+  bottom: calc(var(--bar-h) + 16px);
+  right: 20px;
+  width: 440px;
+  max-width: calc(100vw - 40px);
+  background: #0d0d0d;
+  border: 1px solid var(--cyan);
+  color: var(--ink);
+  z-index: var(--z-tutorial-hud);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.85), 0 0 16px rgba(0, 229, 255, 0.2);
+  font-family: var(--mono);
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: text;
+}
+
+/* HUD Top Header Bar */
+.tutorial-hud-header {
+  background: var(--cyan);
+  color: #000;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.tutorial-hud-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.tutorial-hud-counter {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.tutorial-hud-close {
+  background: none;
+  border: 0;
+  color: #000;
+  cursor: pointer;
+  padding: 0 4px;
+  font-weight: 700;
+}
+
+.tutorial-hud-close::before { content: "["; }
+.tutorial-hud-close::after { content: "]"; }
+.tutorial-hud-close:hover {
+  background: #000;
+  color: var(--cyan);
+}
+
+/* HUD Body Area */
+.tutorial-hud-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  line-height: 1.6;
+  max-height: 55vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.tutorial-hud-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tutorial-hud-body::-webkit-scrollbar-thumb {
+  background: var(--frame);
+}
+
+.tutorial-step-name {
+  color: var(--cyan);
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tutorial-step-desc {
+  margin: 0;
+  color: var(--ink);
+  text-transform: none;
+  white-space: pre-line;
+}
+
+.tutorial-step-tip {
+  margin: 0;
+  padding: 6px 8px;
+  border-left: 2px solid var(--cyan-dim);
+  background: rgba(0, 229, 255, 0.06);
+  color: var(--ink);
+  font-size: 12px;
+  text-transform: none;
+}
+
+/* Interactive helper actions container */
+.tutorial-hud-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.tutorial-action-btn {
+  background: transparent;
+  border: 0;
+  color: var(--cyan);
+  cursor: pointer;
+  padding: 2px 4px;
+  font-family: inherit;
+  font-size: 13px;
+  text-transform: lowercase;
+  vertical-align: baseline;
+}
+
+.tutorial-action-btn::before { content: "["; }
+.tutorial-action-btn::after { content: "]"; }
+.tutorial-action-btn:hover:not(:disabled) {
+  background: var(--cyan);
+  color: #000;
+}
+.tutorial-action-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* HUD Footer & Navigation Controls */
+.tutorial-hud-footer {
+  padding: 10px 16px 12px;
+  border-top: 1px solid var(--frame);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #080808;
+}
+
+.tutorial-hud-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.tutorial-hud-btn {
+  background: none;
+  border: 0;
+  color: var(--cyan);
+  cursor: pointer;
+  padding: 2px 4px;
+  font-family: inherit;
+  font-size: 13px;
+  text-transform: lowercase;
+}
+
+.tutorial-hud-btn::before { content: "["; }
+.tutorial-hud-btn::after { content: "]"; }
+.tutorial-hud-btn:hover:not(:disabled) {
+  background: var(--cyan);
+  color: #000;
+}
+.tutorial-hud-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.tutorial-hud-btn.primary {
+  color: var(--cyan);
+}
+.tutorial-hud-btn.primary:hover:not(:disabled) {
+  background: var(--cyan);
+  color: #000;
+}
+
+.tutorial-hud-keys {
+  font-size: 11px;
+  color: var(--frame-hi);
+  user-select: none;
+}
+
+/* Simulation indicators */
+.tutorial-sim-badge {
+  color: var(--cyan-dim);
+  font-size: 11px;
+  border: 1px solid var(--cyan-dim);
+  padding: 1px 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Top Nav Tutorial Button */
+.titlebar #btnTutorial:hover:not(:disabled) {
+  background: #000;
+  color: var(--cyan);
+}
+
+.titlebar #btnTutorial.active {
+  background: var(--cyan);
+  color: #000;
+}
+
+.titlebar #btnTutorial.active:hover {
+  background: #000;
+  color: var(--cyan);
+}
+

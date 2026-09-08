@@ -84,15 +84,14 @@ export function initUI() {
     const boards = getBoards();
     const board = boards[currentBoardId];
     if (board && board.roles && board.roles.length > 1) {
-      for (let i = board.roles.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [board.roles[i], board.roles[j]] = [board.roles[j], board.roles[i]];
-      }
+      // Circular shift right: moves each role from left to right (0 -> 1 -> 2 -> 0)
+      const lastRole = board.roles.pop();
+      board.roles.unshift(lastRole);
       saveBoards(boards);
       updateBoardUI();
       
       const gs = document.getElementById('globalStatus');
-      gs.textContent = "success: roles shuffled";
+      gs.textContent = "success: roles shifted";
       gs.style.color = 'var(--amber)';
       setTimeout(() => { gs.textContent = 'Status: READY'; gs.style.color = ''; }, 3000);
     }
@@ -325,7 +324,7 @@ export function initUI() {
     const activeSlots = getActiveSlots();
     statusElements.forEach((el, i) => {
       if(el) {
-        el.textContent = activeSlots.find(s => s.slotIndex === i) ? 'waiting...' : 'disabled';
+        el.textContent = activeSlots.find(s => s.slotIndex === i) ? 'waiting' : 'disabled';
         el.style.color = 'var(--frame-hi)';
       }
     });
@@ -604,7 +603,10 @@ export function updateBoardUI() {
         if (r) r.style.opacity = enabled ? '1' : '0.3';
         const s = statusElements[i];
         if (s) {
-          if (!laneStatusHeld) s.textContent = enabled ? 'waiting' : 'disabled';
+          if (!laneStatusHeld) {
+            s.textContent = enabled ? 'waiting' : 'disabled';
+            s.style.color = 'var(--frame-hi)';
+          }
           s.style.opacity = enabled ? '1' : '0.3';
         }
       }
@@ -792,3 +794,117 @@ function downloadMarkdown() {
   // Release the object URL before closing
   document.getElementById('btnDownload').disabled = true;
 }
+
+export const tutorialApi = {
+  getActiveView() {
+    if (settingsMode) return 'settings';
+    if (rolesMode) return 'roles';
+    if (aboutMode) return 'about';
+    return 'main';
+  },
+
+  setActiveView(view) {
+    if (view === 'settings') {
+      if (aboutMode) document.getElementById('btnAbout')?.click();
+      if (rolesMode) document.getElementById('btnRoles')?.click();
+      if (!settingsMode) document.getElementById('btnSettings')?.click();
+    } else if (view === 'roles') {
+      if (aboutMode) document.getElementById('btnAbout')?.click();
+      if (settingsMode) document.getElementById('btnSettings')?.click();
+      if (!rolesMode) document.getElementById('btnRoles')?.click();
+    } else if (view === 'about') {
+      if (settingsMode) document.getElementById('btnSettings')?.click();
+      if (rolesMode) document.getElementById('btnRoles')?.click();
+      if (!aboutMode) document.getElementById('btnAbout')?.click();
+    } else if (view === 'main') {
+      if (settingsMode) document.getElementById('btnSettings')?.click();
+      if (rolesMode) document.getElementById('btnRoles')?.click();
+      if (aboutMode) document.getElementById('btnAbout')?.click();
+      if (!mainMode && !laneStatusHeld) {
+        document.getElementById('btnMain')?.click();
+      }
+    }
+  },
+
+  getBrief() {
+    return document.getElementById('briefInput')?.value || '';
+  },
+
+  setBrief(text) {
+    const input = document.getElementById('briefInput');
+    if (!input) return;
+    input.value = text;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  },
+
+  isRunActive() {
+    const cancelBtn = document.getElementById('btnCancel');
+    return cancelBtn && cancelBtn.style.display !== 'none';
+  },
+
+  shuffleRoles() {
+    document.getElementById('btnShuffleRoles')?.click();
+  },
+
+  getTutorialTarget(name) {
+    const targets = {
+      header: document.querySelector('header.titlebar') || document.getElementById('homeLogo'),
+      tutorialBtn: document.getElementById('btnTutorial'),
+      aboutBtn: document.getElementById('btnAbout'),
+      settingsBtn: document.getElementById('btnSettings'),
+      pingAllBtn: document.getElementById('btnPingAll'),
+      rolesBtn: document.getElementById('btnRoles'),
+      shuffleBtn: document.getElementById('btnShuffleRoles'),
+      runBtn: document.getElementById('btnRun'),
+      cancelBtn: document.getElementById('btnCancel'),
+      downloadBtn: document.getElementById('btnDownload'),
+      clearRunsBtn: document.getElementById('btnClearRuns'),
+      briefInput: document.getElementById('briefInput'),
+      promptArea: document.getElementById('promptArea'),
+      settingsTopBar: document.getElementById('settingsTopBar'),
+      rolesTopBar: document.getElementById('rolesTopBar'),
+      boardSelect: document.getElementById('board-select-wrapper'),
+      boardControls: document.getElementById('boardControls'),
+      lanesWrap: document.querySelector('.lanes-wrap'),
+      lanes: document.querySelector('.lanes'),
+      lane0: document.getElementById('lane-0'),
+      lane1: document.getElementById('lane-1'),
+      lane2: document.getElementById('lane-2'),
+      settings0: document.getElementById('settings-0'),
+      roles0: document.getElementById('roles-0'),
+      youtubeTutorial: document.querySelector('#main-2 iframe') || document.getElementById('main-2') || document.getElementById('about-2'),
+      buyCoffeeBtn: document.getElementById('btnBuyMeACoffee') || document.querySelector('a[href*="buymeacoffee"]'),
+      globalStatus: document.getElementById('globalStatus')
+    };
+    return targets[name] || null;
+  },
+
+  getLaneContentElement(index) {
+    return document.getElementById('content-' + index);
+  },
+
+  getLaneMainElement(index) {
+    return document.getElementById('main-' + index);
+  },
+
+  getLaneStatusElement(index) {
+    return document.getElementById('status-' + index);
+  },
+
+  setSimulationMode(active) {
+    for (let i = 0; i < 3; i++) {
+      const c = document.getElementById('content-' + i);
+      const m = document.getElementById('main-' + i);
+      if (active) {
+        if (m) m.style.display = 'none';
+        if (c) c.style.display = 'block';
+      } else {
+        if (!laneStatusHeld) {
+          if (m) m.style.display = 'block';
+          if (c) c.style.display = 'none';
+        }
+      }
+    }
+  }
+};
+

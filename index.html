@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="icon.svg?v=3">
+  <link rel="mask-icon" href="icon.svg?v=3" color="#ffb000">
+  <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png?v=3">
+  <link rel="icon" type="image/png" sizes="16x16" href="icon-16.png?v=3">
+  <link rel="icon" type="image/x-icon" href="favicon.ico?v=3">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0a0a0a">
 
@@ -16,6 +20,7 @@
   <meta property="og:image" content="https://beitdin.dev/img/share-preview.png">
   <meta property="og:url" content="https://beitdin.dev">
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="css/tutorial.css">
   <style>
     :root {
       --bg: #000000;
@@ -25,6 +30,8 @@
       --frame: #4a4a4a;
       --frame-hi: #6e6e6e;
       --red: #ff5555;
+      --cyan: #00e5ff;
+      --cyan-dim: #008b99;
       --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
       --bar-h: 44px;   /* titlebar, promptbox and footer share one height */
     }
@@ -91,6 +98,7 @@
     button::after, a.btn::after { content: "]"; }
     button:hover:not(:disabled), a.btn:hover { background: #000; color: var(--amber); }
     button:disabled { opacity: .45; cursor: default; }
+    #btnDownload:not(:disabled) { color: #ffffff; }
 
     /* The credit line. Deliberately not a .btn: it is not a command, so it gets
        no brackets. Lowercase like the rest of the app. */
@@ -419,6 +427,7 @@
     
     <div class="controls">
       <button id="btnMain" style="display: none; color: var(--amber);">close_main</button>
+      <button id="btnTutorial">tutorial</button>
       <button id="btnAbout">about</button>
       <button id="btnSettings">settings</button>
       <button id="btnPingAll">ping_all_lanes</button>
@@ -507,9 +516,7 @@
           <div class="lane-status" id="status-1">waiting</div>
         </div>
         <div class="lane-main" id="main-1" style="padding: 16px; overflow-y: auto; flex: 1; color: var(--ink);">
-          <img src="img/beitdin-GIF-V1-Home.gif" alt="beitdin demo" style="margin-bottom: 24px; width: 100%; border: 1px solid var(--frame); display: block;">
-          <p style="color: var(--amber);">> interrogate_your_plan</p>
-          <p>configure three apis and assign each one a distinct system prompt (a role). feed them a single brief, let it run, and watch it generate three parallel outputs.<br><br>want more angles, shuffle the roles and generate six or nine different llm opinions. if you want to thoroughly interrogate your plans before acting, this is the ultimate tool in your toolbox.</p>
+          <img src="img/beitdin-GIF-V1-Home.gif" alt="beitdin demo" style="width: 100%; border: 1px solid var(--frame); display: block;">
         </div>
         <div class="term" id="content-1" style="display: none;"></div>
         <div class="lane-settings" id="settings-1" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"></div>
@@ -531,9 +538,10 @@
           <div class="lane-status" id="status-2">waiting</div>
         </div>
         <div class="lane-main" id="main-2" style="padding: 16px; overflow-y: auto; flex: 1; color: var(--ink);">
-          <iframe style="margin-bottom: 24px; width: 100%; aspect-ratio: 16/9; border: 1px solid var(--frame);" src="https://www.youtube.com/embed/11-k3bRRcUw" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
-          <p style="color: var(--amber);">> check_it_out</p>
-          <p>a tutorial video explaining how this works is available on youtube, check it out</p>
+          <p style="color: var(--amber);">> interrogate_your_plan</p>
+          <p>configure three apis and assign each one a distinct system prompt (a role). feed them a single brief, let it run, and watch it generate three parallel outputs.<br><br>want more angles, shuffle the roles and generate six or nine different llm opinions. if you want to thoroughly interrogate your plans before acting, this is the ultimate tool in your toolbox.</p>
+          <p style="color: var(--amber); margin-top: 22px;">> check_it_out</p>
+          <p>click on <button id="btnLaneTutorial" class="tutorial-action-btn">tutorial</button> to get familiar with this app</p>
         </div>
         <div class="term" id="content-2" style="display: none;"></div>
         <div class="lane-settings" id="settings-2" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"></div>
@@ -560,7 +568,7 @@
     <div class="right" style="display: flex; gap: 16px;">
       <button id="btnClearRuns" disabled style="display: none; color: var(--red);">clear_runs</button>
       <a class="credit" href="https://soundisspirit.com/index.php" target="_blank" rel="noopener noreferrer">(c) <span id="creditYear">2026</span> vesa metsä-ketelä</a>
-      <a class="btn" href="https://www.buymeacoffee.com/soundisspirit" target="_blank" rel="noopener noreferrer">support</a>
+      <a id="btnBuyMeACoffee" class="btn" href="https://www.buymeacoffee.com/soundisspirit" target="_blank" rel="noopener noreferrer">buy_me_a_coffee</a>
       <button id="btnDownload" disabled>download .md</button>
     </div>
   </footer>

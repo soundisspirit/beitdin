@@ -15,6 +15,8 @@ We use a deliberately narrow palette:
 | `--frame` | `#4a4a4a` | Borders, dividers and inactive elements. |
 | `--frame-hi` | `#6e6e6e` | Stronger borders, and inactive status indicators. |
 | `--red` | `#ff5555` | Error states and failures. |
+| `--cyan` | `#00e5ff` | Tutorial accent. Tutorial windows, highlights, and guided controls. |
+| `--cyan-dim` | `#008b99` | Dimmed tutorial accent. Secondary borders and subtle callouts. |
 
 ## 2. Typography
 
