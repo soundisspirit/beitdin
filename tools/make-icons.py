@@ -71,6 +71,15 @@ def main() -> None:
     (OUT / "icon.svg").write_text(svg_content)
     print("icon.svg                  vector (transparent)")
 
+    svg_black = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="15" y="16" width="10" height="67" fill="#000000"/>
+  <rect x="45" y="16" width="10" height="67" fill="#000000"/>
+  <rect x="75" y="16" width="10" height="67" fill="#000000"/>
+</svg>
+"""
+    (OUT / "icon-black.svg").write_text(svg_black)
+    print("icon-black.svg            vector (black, transparent)")
+
     # 2. Transparent PNGs for browser tabs and manifest
     pngs = {
         "icon.png": 512,             # master

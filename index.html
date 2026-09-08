@@ -76,6 +76,16 @@
     header.titlebar h1 {
       margin: 0;
       letter-spacing: .02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    header.titlebar h1 .titlebar-logo {
+      width: 16px;
+      height: 16px;
+      display: block;
+      flex-shrink: 0;
     }
 
     .controls {
@@ -423,7 +433,14 @@
 
 
   <header class="titlebar">
-    <h1 id="homeLogo" style="cursor: pointer;">beitdin.dev</h1>
+    <h1 id="homeLogo" style="cursor: pointer;">
+      <svg class="titlebar-logo" viewBox="0 0 100 100" fill="#000" aria-hidden="true">
+        <rect x="15" y="16" width="10" height="67"/>
+        <rect x="45" y="16" width="10" height="67"/>
+        <rect x="75" y="16" width="10" height="67"/>
+      </svg>
+      <span>beitdin.dev</span>
+    </h1>
     
     <div class="controls">
       <button id="btnMain" style="display: none; color: var(--amber);">close_main</button>
