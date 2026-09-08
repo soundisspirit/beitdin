@@ -8,6 +8,8 @@
  ▀  ▀  ▀
 ```
 
+> **Live app: [beitdin.dev](https://beitdin.dev)**
+
 If you want to supercharge your planning phase using AI, this is the tool.
 
 Beitdin lets you run multiple LLMs together, bringing multiple different perspectives from different providers and models toward one single goal. Configure three APIs, assign each one a distinct system prompt (a role), feed them a single brief, and watch it generate three parallel outputs. 
@@ -20,6 +22,8 @@ The app is a static page. It talks straight to the provider APIs from the
 browser, with no server, no build step and no dependencies.
 
 ## Quick start
+
+Try it live at **[beitdin.dev](https://beitdin.dev)**, or run it locally:
 
 1. Serve the directory: `python3 -m http.server 8333 --bind 127.0.0.1`
 2. Open `http://127.0.0.1:8333` in a desktop browser.
