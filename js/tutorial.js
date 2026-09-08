@@ -143,8 +143,7 @@ const STEPS = [
     view: 'about',
     targets: ['aboutBtn', 'youtubeTutorial', 'buyCoffeeBtn'],
     actions: [
-      { id: 'exitTut', label: 'exit_tutorial', run: exitTutorial },
-      { id: 'buyCoffee', label: 'buy_me_a_coffee', run: () => window.open('https://www.buymeacoffee.com/soundisspirit', '_blank', 'noopener,noreferrer') }
+      { id: 'exitTut', label: 'exit_tutorial', run: exitTutorial }
     ]
   }
 ];
