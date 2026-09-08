@@ -512,6 +512,8 @@
         <div class="lane-main" id="main-0" style="padding: 16px; overflow-y: auto; flex: 1; color: var(--ink);">
           <p style="color: var(--amber);">> supercharge_your_planning</p>
           <p>if you want to supercharge your planning phase using ai, you are in the right place. this is a great advantage for speeding up development and turning every stone on your idea before you commit to a plan.<br><br>beitdin lets you run multiple llms together, bringing multiple different perspectives from different providers and models toward one single goal.</p>
+          <p style="color: var(--amber); margin-top: 22px;">> open_source</p>
+          <p>100% client-side and free. inspect or fork the source on <a class="btn" href="https://github.com/soundisspirit/beitdin" target="_blank" rel="noopener noreferrer">github</a>.</p>
         </div>
         <div class="term" id="content-0" style="display: none;"></div>
         <div class="lane-settings" id="settings-0" style="display: none; padding: 16px; overflow-y: auto; flex: 1;"></div>
@@ -521,7 +523,7 @@
           <p>three specialists read your brief at the same time and hand you one document with all three outputs.<br><br>each lane holds a model <span style="color: var(--amber);">and a role</span>: a title and a system prompt. the same brief reaches lane one as a technical architect and lane two as a security expert, so the answers diverge because the framing differs, not because you asked three different things.<br><br><span style="color: var(--amber);">this is not a model comparison tool, but you can use it like that too if you want.</span> it is not asking which model wrote the better answer to one question. the lanes ask different questions of the same brief.<br><br>every lane is configured on its own, so you can put openai beside gemini beside a local ollama.<br><br>shuffle_roles deals the roles out to different lanes. run the same brief again and the security role lands on a model that did not hold it last time. every run appends to the same markdown document, so the angles stack up in one file that you can hand onward.<br><br>bring your own key. there is no server, no account and no queue: the page is static and your browser talks straight to whichever api you point it at.</p>
 
           <p style="color: var(--amber); margin-top: 22px;">> architecture_and_data</p>
-          <p><span style="color: var(--amber);">no backend:</span> the app is a fully static html/js page. your brief, data, and api keys go directly from your browser to your chosen ai provider. data never routes through beitdin's servers.<br><br><span style="color: var(--amber);">keys are not saved to disk:</span> api keys are stored only in the browser's session storage. they disappear completely as soon as you close the tab. they are never written to your hard drive or sent anywhere else.</p>
+          <p><span style="color: var(--amber);">no backend:</span> the app is a fully static html/js page. your brief, data, and api keys go directly from your browser to your chosen ai provider. data never routes through beitdin's servers.<br><br><span style="color: var(--amber);">keys are not saved to disk:</span> api keys are stored only in the browser's session storage. they disappear completely as soon as you close the tab. they are never written to your hard drive or sent anywhere else.<br><br><span style="color: var(--amber);">open source:</span> the code is public and open source on <a class="btn" href="https://github.com/soundisspirit/beitdin" target="_blank" rel="noopener noreferrer">github</a>.</p>
         </div>
       </div>
       
@@ -585,6 +587,7 @@
     <div class="right" style="display: flex; gap: 16px;">
       <button id="btnClearRuns" disabled style="display: none; color: var(--red);">clear_runs</button>
       <a class="credit" href="https://soundisspirit.com/index.php" target="_blank" rel="noopener noreferrer">(c) <span id="creditYear">2026</span> vesa metsä-ketelä</a>
+      <a id="btnGithub" class="btn" href="https://github.com/soundisspirit/beitdin" target="_blank" rel="noopener noreferrer">github</a>
       <a id="btnBuyMeACoffee" class="btn" href="https://www.buymeacoffee.com/soundisspirit" target="_blank" rel="noopener noreferrer">buy_me_a_coffee</a>
       <button id="btnDownload" disabled>download .md</button>
     </div>
