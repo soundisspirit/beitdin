@@ -631,12 +631,15 @@ async function startRun() {
     return;
   }
 
+  // Force laneStatusHeld to true temporarily so that closing menus 
+  // falls back to the content view instead of the landing page.
+  laneStatusHeld = true;
   if (mainMode) document.getElementById('btnMain').click();
   if (aboutMode) document.getElementById('btnAbout').click();
   if (settingsMode) document.getElementById('btnSettings').click();
   if (rolesMode) document.getElementById('btnRoles').click();
 
-  // Reset UI
+  // Reset UI for the new run
   laneStatusHeld = false;
   laneBuffers.fill('');
   laneElements.forEach(el => {
