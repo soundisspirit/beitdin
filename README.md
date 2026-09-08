@@ -62,26 +62,6 @@ by side is the whole point, and that does not survive a phone.
 - **Endpoint responsibility:** Since you configure the target URL, you are responsible for knowing where your keys are sent.
 - **Disclaimer:** This tool is provided "as is", without warranty of any kind. The author takes no responsibility for any misuse, data leaks, API costs, or any other consequences resulting from the use of this software. Use at your own risk.
 
-## Layout
-
-```text
-.
-├── index.html           # markup, all of the CSS, one module script tag
-├── design-system.html   # component catalogue, served the same way
-├── manifest.json
-├── js/
-│   ├── main.js          # entry point
-│   ├── ui.js            # DOM wiring, streaming render, board actions
-│   ├── orchestrator.js  # runs the three lanes, builds the markdown
-│   ├── slots.js         # per-lane provider configuration
-│   ├── storage.js       # localStorage wrapper and defaults
-│   ├── logos.js         # the three lane marks
-│   ├── logohistory.js   # backup of logos for future updates (gitignored)
-│   └── adapters/        # openai-compat.js, gemini.js
-├── tools/make-icons.py  # regenerates every icon from the mark above
-└── docs/                # design system, concept notes
-```
-
 ## Conventions
 
 - Native ES modules. No build step, no bundler, no npm dependencies.
